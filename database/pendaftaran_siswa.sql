@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS users (
     role ENUM('siswa', 'admin', 'kepsek') NOT NULL DEFAULT 'siswa',
     status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS registrations (
@@ -35,13 +36,17 @@ CREATE TABLE IF NOT EXISTS registrations (
     form_status ENUM('Belum Mengisi', 'Sudah Dikirim', 'Menunggu Verifikasi') NOT NULL DEFAULT 'Belum Mengisi',
     document_status ENUM('Belum Upload', 'Menunggu Verifikasi', 'Berkas Lengkap', 'Berkas Tidak Lengkap') NOT NULL DEFAULT 'Belum Upload',
     selection_status ENUM('Belum Diproses', 'Diterima', 'Tidak Diterima', 'Cadangan') NOT NULL DEFAULT 'Belum Diproses',
+    re_registration_status ENUM('Belum Daftar Ulang', 'Sudah Daftar Ulang') NOT NULL DEFAULT 'Belum Daftar Ulang',
     admin_note TEXT NULL,
     selection_note TEXT NULL,
     submitted_at DATETIME NULL,
     selected_at DATETIME NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT registrations_user_id_foreign FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    CONSTRAINT registrations_user_id_foreign FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_registration_school_year (school_year),
+    INDEX idx_registration_status (selection_status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS documents (

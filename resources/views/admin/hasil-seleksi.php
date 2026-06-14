@@ -13,7 +13,7 @@
                             <th>Nama Siswa</th>
                             <th>No Pendaftaran</th>
                             <th>Status Seleksi</th>
-                            <th>Keterangan</th>
+                            <th>Daftar Ulang</th>
                             <th>Tanggal Diproses</th>
                             <th>Siap Publikasi</th>
                         </tr>
@@ -24,7 +24,13 @@
                                 <td><?= e($applicant['name']) ?></td>
                                 <td><?= e($applicant['no']) ?></td>
                                 <td><span class="badge badge-<?= e(status_class($applicant['selection_status'])) ?>"><?= e($applicant['selection_status']) ?></span></td>
-                                <td><?= $applicant['selection_status'] === 'Diterima' ? 'Lulus seleksi administrasi.' : '-' ?></td>
+                                <td>
+                                    <?php if ($applicant['selection_status'] === 'Diterima'): ?>
+                                        <span class="badge badge-<?= $applicant['re_registration_status'] === 'Sudah Daftar Ulang' ? 'success' : 'warning' ?>"><?= e($applicant['re_registration_status']) ?></span>
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </td>
                                 <td>25 Juni 2026</td>
                                 <td>
                                     <form action="<?= e(url_for('admin-hasil-seleksi')) ?>" method="post" class="form-inline">

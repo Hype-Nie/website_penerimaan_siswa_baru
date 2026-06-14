@@ -28,7 +28,7 @@ function current_user(): ?array
         return null;
     }
 
-    $stmt = db()->prepare('SELECT * FROM users WHERE id = ? AND status = "active" LIMIT 1');
+    $stmt = db()->prepare('SELECT * FROM users WHERE id = ? AND status = "active" AND deleted_at IS NULL LIMIT 1');
     $stmt->execute([$_SESSION['user_id']]);
     $user = $stmt->fetch();
 
@@ -74,7 +74,7 @@ function auth_login(string $username, string $password): bool
         return false;
     }
 
-    $stmt = db()->prepare('SELECT * FROM users WHERE (username = ? OR email = ?) AND status = "active" LIMIT 1');
+    $stmt = db()->prepare('SELECT * FROM users WHERE (username = ? OR email = ?) AND status = "active" AND deleted_at IS NULL LIMIT 1');
     $stmt->execute([$username, $username]);
     $user = $stmt->fetch();
 
@@ -125,7 +125,7 @@ function register_student_account(array $input): bool
         return false;
     }
 
-    $emailExists = db()->prepare('SELECT id FROM users WHERE email = ? LIMIT 1');
+    $emailExists = db()->prepare('SELECT id FROM users WHERE email = ? AND deleted_at IS NULL LIMIT 1');
     $emailExists->execute([$email]);
 
     if ($emailExists->fetch()) {
@@ -136,7 +136,7 @@ function register_student_account(array $input): bool
     $username = strtolower(preg_replace('/[^a-z0-9]+/i', '', strtok($email, '@')));
     $username = $username !== '' ? $username : 'siswa';
 
-    $exists = db()->prepare('SELECT id FROM users WHERE username = ? LIMIT 1');
+    $exists = db()->prepare('SELECT id FROM users WHERE username = ? AND deleted_at IS NULL LIMIT 1');
     $exists->execute([$username]);
 
     if ($exists->fetch()) {
@@ -186,7 +186,7 @@ function register_student_account(array $input): bool
 function generate_registration_no(): string
 {
     $year = date('Y');
-    $stmt = db()->query('SELECT COUNT(*) AS total FROM registrations');
+    $stmt = db()->query('SELECT COUNT(*) AS total FROM registrations WHERE deleted_at IS NULL');
     $total = (int) ($stmt->fetch()['total'] ?? 0) + 1;
 
     return sprintf('PSB-%s-%04d', $year, $total);
@@ -304,6 +304,7 @@ function psb_stats(array $sample): array
             SUM(selection_status = "Tidak Diterima") AS tidak_diterima,
             SUM(selection_status = "Cadangan") AS cadangan
         FROM registrations
+        WHERE deleted_at IS NULL
     ')->fetch();
 
     return [
@@ -322,7 +323,7 @@ function applicant_rows(array $sample): array
         return $sample['applicants'];
     }
 
-    $where = [];
+    $where = ['r.deleted_at IS NULL', 'u.deleted_at IS NULL'];
     $params = [];
 
     $query = trim($_GET['q'] ?? '');
@@ -391,6 +392,7 @@ function map_registration_row(array $row): array
         'form_status' => $row['form_status'],
         'document_status' => $row['document_status'],
         'selection_status' => $row['selection_status'],
+        're_registration_status' => $row['re_registration_status'] ?? 'Belum Daftar Ulang',
         'admin_note' => $row['admin_note'] ?? '',
         'selection_note' => $row['selection_note'] ?? '',
         'submitted_at' => $row['submitted_at'] ?? null,
@@ -407,7 +409,7 @@ function find_registration_by_id($id): ?array
         SELECT r.*, u.name, u.email, u.phone
         FROM registrations r
         JOIN users u ON u.id = r.user_id
-        WHERE r.id = ?
+        WHERE r.id = ? AND r.deleted_at IS NULL AND u.deleted_at IS NULL
         LIMIT 1
     ');
     $stmt->execute([(int) $id]);
@@ -434,6 +436,7 @@ function current_student_data(array $sample): array
             SELECT r.*, u.name, u.email, u.phone
             FROM registrations r
             JOIN users u ON u.id = r.user_id
+            WHERE r.deleted_at IS NULL AND u.deleted_at IS NULL
             ORDER BY r.id ASC
             LIMIT 1
         ')->fetch();
@@ -463,6 +466,7 @@ function current_student_data(array $sample): array
         'form_status' => $registration['form_status'],
         'document_status' => $registration['document_status'],
         'selection_status' => published_results() ? $registration['selection_status'] : 'Belum Diumumkan',
+        're_registration_status' => $registration['re_registration_status'] ?? 'Belum Daftar Ulang',
     ];
 }
 
@@ -472,7 +476,7 @@ function registration_for_user(int $userId): ?array
         SELECT r.*, u.name, u.email, u.phone
         FROM registrations r
         JOIN users u ON u.id = r.user_id
-        WHERE r.user_id = ?
+        WHERE r.user_id = ? AND r.deleted_at IS NULL AND u.deleted_at IS NULL
         LIMIT 1
     ');
     $stmt->execute([$userId]);
@@ -538,13 +542,19 @@ function documents_for_registration(?int $registrationId, array $sample): array
 
 function timeline_for_student(array $student): array
 {
-    return [
+    $timeline = [
         ['step' => 'Registrasi Akun', 'status' => 'Selesai'],
         ['step' => 'Formulir Pendaftaran', 'status' => $student['form_status'] ?? 'Belum Mengisi'],
         ['step' => 'Upload Berkas', 'status' => $student['document_status'] ?? 'Belum Upload'],
         ['step' => 'Seleksi', 'status' => ($student['selection_status'] ?? '') === 'Belum Diumumkan' ? 'Belum Diproses' : $student['selection_status']],
         ['step' => 'Hasil Seleksi', 'status' => published_results() ? ($student['selection_status'] ?? 'Belum Tersedia') : 'Belum Tersedia'],
     ];
+
+    if (published_results() && ($student['selection_status'] ?? '') === 'Diterima') {
+        $timeline[] = ['step' => 'Daftar Ulang', 'status' => $student['re_registration_status'] ?? 'Belum Daftar Ulang'];
+    }
+
+    return $timeline;
 }
 
 function announcements(array $sample): array
@@ -687,7 +697,7 @@ function save_student_profile(array $input): bool
     $registration = ensure_registration_for_user((int) $user['id']);
 
     $email = trim($input['email'] ?? $user['email']);
-    $emailExists = db()->prepare('SELECT id FROM users WHERE email = ? AND id != ? LIMIT 1');
+    $emailExists = db()->prepare('SELECT id FROM users WHERE email = ? AND id != ? AND deleted_at IS NULL LIMIT 1');
     $emailExists->execute([$email, $user['id']]);
 
     if ($emailExists->fetch()) {
@@ -859,10 +869,38 @@ function delete_registration(array $input): bool
         return false;
     }
 
-    $stmt = db()->prepare('DELETE FROM registrations WHERE id = ?');
+    $stmt = db()->prepare('UPDATE registrations SET deleted_at = NOW() WHERE id = ?');
     $stmt->execute([$registrationId]);
 
     flash('success', 'Data pendaftaran berhasil dihapus.');
+    return true;
+}
+
+function confirm_re_registration(): bool
+{
+    $user = current_user();
+
+    if (! $user || ! db_available()) {
+        flash('danger', 'Sesi tidak valid atau database belum tersedia.');
+        return false;
+    }
+
+    $registration = registration_for_user((int) $user['id']);
+
+    if (! $registration) {
+        flash('danger', 'Data pendaftaran tidak ditemukan.');
+        return false;
+    }
+
+    if (! published_results() || $registration['selection_status'] !== 'Diterima') {
+        flash('danger', 'Anda tidak dapat melakukan daftar ulang karena tidak dinyatakan diterima.');
+        return false;
+    }
+
+    $stmt = db()->prepare('UPDATE registrations SET re_registration_status = "Sudah Daftar Ulang" WHERE id = ?');
+    $stmt->execute([$registration['id']]);
+
+    flash('success', 'Daftar ulang online berhasil dikonfirmasi.');
     return true;
 }
 
@@ -954,6 +992,7 @@ function handle_post(string $page): void
         'pendaftaran' => 'siswa',
         'siswa-upload-berkas' => 'siswa',
         'siswa-profil' => 'siswa',
+        'siswa-hasil' => 'siswa',
         'admin-data-pendaftaran' => 'admin',
         'admin-verifikasi-berkas' => 'admin',
         'admin-proses-seleksi' => 'admin',
@@ -991,6 +1030,13 @@ function handle_post(string $page): void
     if ($page === 'siswa-profil') {
         save_student_profile($_POST);
         redirect_to('siswa-profil');
+    }
+
+    if ($page === 'siswa-hasil') {
+        if (($_POST['action'] ?? '') === 're_register') {
+            confirm_re_registration();
+        }
+        redirect_to('siswa-hasil');
     }
 
     if ($page === 'admin-verifikasi-berkas') {

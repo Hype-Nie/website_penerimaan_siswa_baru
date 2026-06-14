@@ -27,7 +27,7 @@
                             <th>No Pendaftaran</th>
                             <th>Nama Siswa</th>
                             <th>Status Seleksi</th>
-                            <th>Keterangan</th>
+                            <th>Daftar Ulang</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -36,7 +36,13 @@
                                 <td><?= e($applicant['no']) ?></td>
                                 <td><?= e($applicant['name']) ?></td>
                                 <td><span class="badge badge-<?= e(status_class($applicant['selection_status'])) ?>"><?= e($applicant['selection_status']) ?></span></td>
-                                <td><?= $applicant['selection_status'] === 'Diterima' ? 'Dapat melakukan daftar ulang.' : '-' ?></td>
+                                <td>
+                                    <?php if ($applicant['selection_status'] === 'Diterima'): ?>
+                                        <span class="badge badge-<?= $applicant['re_registration_status'] === 'Sudah Daftar Ulang' ? 'success' : 'warning' ?>"><?= e($applicant['re_registration_status']) ?></span>
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
