@@ -30,7 +30,13 @@ $documents = $selectedApplicant ? documents_for_registration($selectedApplicant[
                                         <td><?= e($document['name']) ?></td>
                                         <td><?= e($document['file']) ?></td>
                                         <td><span class="badge badge-<?= e(status_class($document['status'])) ?>"><?= e($document['status']) ?></span></td>
-                                        <td><a class="btn btn-info btn-sm" href="#">Lihat Berkas</a></td>
+                                        <td>
+                                            <?php if ($document['file_path']): ?>
+                                                <a class="btn btn-info btn-sm" href="<?= e(url_for('view-berkas', ['id' => $document['id']])) ?>" target="_blank">Lihat Berkas</a>
+                                            <?php else: ?>
+                                                <span class="text-muted">Belum Upload</span>
+                                            <?php endif; ?>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>

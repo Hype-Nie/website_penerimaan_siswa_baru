@@ -33,7 +33,7 @@
                     </div>
                     <div class="form-group col-md-4">
                         <label>Tanggal Lahir</label>
-                        <input type="text" class="form-control strong-input" name="birth_date" value="<?= e($student['birth_date']) ?>" placeholder="dd-mm-yyyy">
+                        <input type="date" class="form-control strong-input" name="birth_date" value="<?= e($student['birth_date']) ?>">
                     </div>
                 </div>
                 <div class="form-row">

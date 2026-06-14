@@ -376,7 +376,7 @@ function map_registration_row(array $row): array
         'nisn' => $row['nisn'] ?? '',
         'gender' => $row['gender'] ?? '-',
         'birth_place' => $row['birth_place'] ?? '',
-        'birth_date' => format_date_id($row['birth_date'] ?? null),
+        'birth_date' => $row['birth_date'] ?? null,
         'religion' => $row['religion'] ?? '',
         'address' => $row['address'] ?? '',
         'father' => $row['father_name'] ?? '',
@@ -827,6 +827,13 @@ function update_document_verification(array $input): bool
             WHERE id = ?
         ');
         $stmt->execute([$status, $note, $user['id'] ?? null, (int) $input['document_id']]);
+    } else {
+        $stmt = db()->prepare('
+            UPDATE documents
+            SET status = ?, note = ?, verified_by = ?, verified_at = NOW()
+            WHERE registration_id = ? AND file_path IS NOT NULL
+        ');
+        $stmt->execute([$status, $note, $user['id'] ?? null, $registrationId]);
     }
 
     send_document_status_email($registrationId, $status, $note);
