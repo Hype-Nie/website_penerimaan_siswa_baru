@@ -18,7 +18,7 @@
                 </div>
                 <div class="form-group col-md-6">
                     <label>Tanggal Lahir</label>
-                    <input type="text" class="form-control strong-input" name="birth_date" placeholder="Tanggal Lahir">
+                    <input type="date" class="form-control strong-input" name="birth_date" placeholder="Tanggal Lahir">
                 </div>
             </div>
 
