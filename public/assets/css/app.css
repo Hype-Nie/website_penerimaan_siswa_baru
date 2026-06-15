@@ -621,3 +621,505 @@ body {
         flex-direction: column;
     }
 }
+
+/* ==========================================================================
+   LANDING PAGE (.psb-page-beranda) CUSTOM STYLES
+   ========================================================================== */
+
+.psb-guest-shell.psb-page-beranda {
+    background-color: #f8fafc;
+    background-image: radial-gradient(at 40% 20%, rgba(47, 85, 199, 0.05) 0px, transparent 50%),
+                      radial-gradient(at 80% 0%, rgba(142, 45, 226, 0.05) 0px, transparent 50%),
+                      radial-gradient(at 0% 50%, rgba(47, 85, 199, 0.05) 0px, transparent 50%);
+}
+
+.psb-page-beranda .guest-navbar {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.psb-page-beranda .guest-brand span {
+    background: linear-gradient(135deg, #2f55c7, #8e2de2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.25rem;
+}
+
+.psb-page-beranda .hero-section {
+    background: radial-gradient(circle at top right, rgba(142, 45, 226, 0.05), transparent 50%),
+                radial-gradient(circle at bottom left, rgba(47, 85, 199, 0.05), transparent 50%);
+    border-radius: 1.5rem;
+    padding: 3rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+    min-height: auto;
+}
+
+.psb-page-beranda .hero-copy {
+    flex: 1;
+}
+
+.psb-page-beranda .hero-copy h1 {
+    font-size: 3.5rem;
+    background: linear-gradient(135deg, #111827, #2f55c7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+}
+
+.psb-page-beranda .hero-illustration-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+.psb-page-beranda .hero-image-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 450px;
+    aspect-ratio: 1 / 1;
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(47, 85, 199, 0.25);
+    background: linear-gradient(135deg, rgba(47, 85, 199, 0.1), rgba(142, 45, 226, 0.1));
+    border: 8px solid rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+.psb-page-beranda .hero-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.psb-page-beranda .btn-primary {
+    background: linear-gradient(135deg, #2f55c7, #5c7cfa);
+    border: none;
+    box-shadow: 0 4px 15px rgba(47, 85, 199, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 999px;
+    padding: 0.75rem 2rem;
+    font-weight: 700;
+}
+
+.psb-page-beranda .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(47, 85, 199, 0.4);
+    color: white;
+}
+
+.psb-page-beranda .btn-outline-primary {
+    border-radius: 999px;
+    padding: 0.75rem 2rem;
+    font-weight: 700;
+    border: 2px solid #2f55c7;
+    color: #2f55c7;
+    transition: all 0.2s;
+}
+
+.psb-page-beranda .btn-outline-primary:hover {
+    background: rgba(47, 85, 199, 0.05);
+    transform: translateY(-2px);
+}
+
+/* Glassmorphism Quota Box */
+.psb-page-beranda .quota-glass-box {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 1rem;
+    padding: 1.5rem 2.5rem;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
+    display: inline-block;
+    margin-top: 2rem;
+}
+
+.psb-page-beranda .quota-glass-box span {
+    display: block;
+    font-size: 0.9rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.psb-page-beranda .quota-glass-box strong {
+    font-size: 3rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+}
+
+/* Process Cards */
+.psb-page-beranda .process-grid {
+    gap: 1.5rem;
+}
+
+.psb-page-beranda .process-card {
+    transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+    border: 1px solid #edf0f7;
+    text-align: center;
+    padding: 2rem 1.5rem;
+    border-radius: 1rem;
+    position: relative;
+    z-index: 1;
+    background: #ffffff;
+}
+
+.psb-page-beranda .process-card:hover {
+    border-color: #8e2de2;
+}
+
+.psb-page-beranda .process-card span {
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: 1.25rem;
+    margin: 0 auto 1.25rem;
+    background: linear-gradient(135deg, #2f55c7, #8e2de2);
+    box-shadow: 0 4px 15px rgba(47, 85, 199, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    border-radius: 50%;
+    font-weight: 800;
+}
+
+.psb-page-beranda .process-card strong {
+    display: block;
+    font-size: 1.1rem;
+    color: #1f2933;
+}
+
+/* Announcements */
+.psb-page-beranda .announcement-card {
+    border-radius: 1rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 1px solid #edf0f7;
+    padding: 1.5rem;
+    background: #fff;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.psb-page-beranda .announcement-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+    text-decoration: none;
+}
+
+.psb-page-beranda .announcement-card small {
+    display: inline-block;
+    background: rgba(47, 85, 199, 0.1);
+    color: #2f55c7;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+}
+
+.psb-page-beranda .announcement-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+    color: #202938;
+    font-weight: 800;
+}
+
+.psb-page-beranda .announcement-card p {
+    color: #6b7280;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.psb-page-beranda .section-title h2 {
+    font-size: 2.25rem;
+}
+
+@media (max-width: 991.98px) {
+    .psb-page-beranda .hero-section {
+        flex-direction: column;
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .psb-page-beranda .hero-actions {
+        justify-content: center;
+    }
+    
+    .psb-page-beranda .hero-copy h1 {
+        font-size: 2.5rem;
+    }
+}
+
+/* Footer Landing Page */
+.psb-page-beranda .guest-footer {
+    background: #ffffff;
+    border-top: 1px solid #edf0f7;
+    padding: 4rem 7vw 2rem;
+    margin-top: 5rem;
+}
+
+.psb-page-beranda .footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+}
+
+.psb-page-beranda .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: #1f2933;
+    margin-bottom: 1rem;
+    text-decoration: none;
+}
+
+.psb-page-beranda .footer-brand img {
+    height: 2.6rem;
+    width: 2.6rem;
+}
+
+.psb-page-beranda .footer-col p {
+    color: #6b7280;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.psb-page-beranda .footer-col h4 {
+    color: #111827;
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 1.25rem;
+}
+
+.psb-page-beranda .footer-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.psb-page-beranda .footer-col ul li {
+    margin-bottom: 0.75rem;
+}
+
+.psb-page-beranda .footer-col ul a {
+    color: #6b7280;
+    text-decoration: none;
+    transition: color 0.2s;
+    font-size: 0.95rem;
+}
+
+.psb-page-beranda .footer-col ul a:hover {
+    color: #2f55c7;
+}
+
+.psb-page-beranda .footer-bottom {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid #edf0f7;
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   INFORMASI PSB PAGE (.psb-page-informasi-psb) CUSTOM STYLES
+   ========================================================================== */
+.psb-guest-shell.psb-page-informasi-psb {
+    background-color: #f8fafc;
+    background-image: radial-gradient(at 40% 20%, rgba(47, 85, 199, 0.05) 0px, transparent 50%),
+                      radial-gradient(at 80% 0%, rgba(142, 45, 226, 0.05) 0px, transparent 50%),
+                      radial-gradient(at 0% 50%, rgba(47, 85, 199, 0.05) 0px, transparent 50%);
+}
+
+.psb-page-informasi-psb .guest-navbar {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.psb-page-informasi-psb .guest-brand span {
+    background: linear-gradient(135deg, #2f55c7, #8e2de2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.25rem;
+}
+
+.psb-page-informasi-psb .gradient-text {
+    background: linear-gradient(135deg, #111827, #2f55c7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.psb-page-informasi-psb .modern-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    border: 1px solid #edf0f7;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.psb-page-informasi-psb .modern-card:hover {
+    box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+    transform: translateY(-2px);
+}
+
+.psb-page-informasi-psb .card-title-modern {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #1f2933;
+    border-bottom: 2px solid #f0f2f7;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.psb-page-informasi-psb .modern-table th {
+    background: transparent;
+    font-weight: 700;
+    color: #343a46;
+    border-top: none;
+    padding-left: 0;
+}
+
+.psb-page-informasi-psb .modern-table td {
+    color: #6b7280;
+    border-top: none;
+}
+
+.psb-page-informasi-psb .modern-table tr {
+    border-bottom: 1px solid #edf0f7;
+}
+
+.psb-page-informasi-psb .modern-table tr:last-child {
+    border-bottom: none;
+}
+
+.psb-page-informasi-psb .modern-list li {
+    padding: 0.5rem 0;
+    color: #4b5563;
+    list-style-type: none;
+}
+
+.psb-page-informasi-psb ul.modern-list {
+    padding-left: 0;
+}
+
+.psb-page-informasi-psb ol.modern-list {
+    padding-left: 1.5rem;
+}
+
+.psb-page-informasi-psb ol.modern-list li {
+    list-style-type: decimal;
+}
+
+.psb-page-informasi-psb .contact-info p {
+    color: #4b5563;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.psb-page-informasi-psb .contact-info strong {
+    margin-right: 0.5rem;
+    color: #1f2933;
+}
+
+/* Footer (Reused styles) */
+.psb-page-informasi-psb .guest-footer {
+    background: #ffffff;
+    border-top: 1px solid #edf0f7;
+    padding: 4rem 7vw 2rem;
+    margin-top: 5rem;
+}
+.psb-page-informasi-psb .footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+}
+.psb-page-informasi-psb .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: #1f2933;
+    margin-bottom: 1rem;
+    text-decoration: none;
+}
+.psb-page-informasi-psb .footer-brand img {
+    height: 2.6rem;
+    width: 2.6rem;
+}
+.psb-page-informasi-psb .footer-col p {
+    color: #6b7280;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+.psb-page-informasi-psb .footer-col h4 {
+    color: #111827;
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 1.25rem;
+}
+.psb-page-informasi-psb .footer-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.psb-page-informasi-psb .footer-col ul li {
+    margin-bottom: 0.75rem;
+}
+.psb-page-informasi-psb .footer-col ul a {
+    color: #6b7280;
+    text-decoration: none;
+    transition: color 0.2s;
+    font-size: 0.95rem;
+}
+.psb-page-informasi-psb .footer-col ul a:hover {
+    color: #2f55c7;
+}
+.psb-page-informasi-psb .footer-bottom {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid #edf0f7;
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 575.98px) {
+    .psb-page-informasi-psb .gradient-text {
+        font-size: 2rem;
+    }
+}
