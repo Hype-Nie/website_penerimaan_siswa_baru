@@ -49,7 +49,7 @@
                                     <form action="<?= e(url_for('admin-data-pendaftaran')) ?>" method="post">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="registration_id" value="<?= e($applicant['id'] ?? 0) ?>">
-                                        <button class="btn btn-danger btn-sm" type="submit">Hapus</button>
+                                        <button class="btn btn-danger btn-sm" type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus data pendaftaran siswa ini?')">Hapus</button>
                                     </form>
                                     <a class="btn btn-success btn-sm" href="<?= e(url_for('admin-verifikasi-berkas', ['id' => $applicant['id'] ?? 0])) ?>">Verifikasi</a>
                                 </td>

@@ -186,8 +186,16 @@ function register_student_account(array $input): bool
 function generate_registration_no(): string
 {
     $year = date('Y');
-    $stmt = db()->query('SELECT COUNT(*) AS total FROM registrations WHERE deleted_at IS NULL');
-    $total = (int) ($stmt->fetch()['total'] ?? 0) + 1;
+    $stmt = db()->prepare('SELECT registration_no FROM registrations WHERE registration_no LIKE ? ORDER BY id DESC LIMIT 1');
+    $stmt->execute(['PSB-' . $year . '-%']);
+    $lastNo = $stmt->fetchColumn();
+
+    if ($lastNo) {
+        $parts = explode('-', $lastNo);
+        $total = (int) end($parts) + 1;
+    } else {
+        $total = 1;
+    }
 
     return sprintf('PSB-%s-%04d', $year, $total);
 }
@@ -345,9 +353,11 @@ function applicant_rows(array $sample): array
     }
 
     $sql = '
-        SELECT r.*, u.name, u.email, u.phone
+        SELECT r.*, u.name, u.email, u.phone,
+               s.nilai_uts, s.nilai_uas, s.nilai_un, s.nilai_rata_rata
         FROM registrations r
         JOIN users u ON u.id = r.user_id
+        LEFT JOIN selection_scores s ON s.registration_id = r.id
     ';
 
     if ($where !== []) {
@@ -385,10 +395,10 @@ function map_registration_row(array $row): array
         'origin_school' => $row['origin_school'] ?? '',
         'school_year' => $row['school_year'] ?? '',
         'date' => format_date_id($row['created_at'] ?? null),
-        'uts' => 0,
-        'uas' => 0,
-        'un' => 0,
-        'average' => 0,
+        'uts' => $row['nilai_uts'] ?? 0,
+        'uas' => $row['nilai_uas'] ?? 0,
+        'un' => $row['nilai_un'] ?? 0,
+        'average' => $row['nilai_rata_rata'] ?? 0,
         'form_status' => $row['form_status'],
         'document_status' => $row['document_status'],
         'selection_status' => $row['selection_status'],
@@ -406,9 +416,11 @@ function find_registration_by_id($id): ?array
     }
 
     $stmt = db()->prepare('
-        SELECT r.*, u.name, u.email, u.phone
+        SELECT r.*, u.name, u.email, u.phone,
+               s.nilai_uts, s.nilai_uas, s.nilai_un, s.nilai_rata_rata
         FROM registrations r
         JOIN users u ON u.id = r.user_id
+        LEFT JOIN selection_scores s ON s.registration_id = r.id
         WHERE r.id = ? AND r.deleted_at IS NULL AND u.deleted_at IS NULL
         LIMIT 1
     ');
@@ -433,9 +445,11 @@ function current_student_data(array $sample): array
 
     if (! $registration) {
         $row = db()->query('
-            SELECT r.*, u.name, u.email, u.phone
+            SELECT r.*, u.name, u.email, u.phone,
+                   s.nilai_uts, s.nilai_uas, s.nilai_un, s.nilai_rata_rata
             FROM registrations r
             JOIN users u ON u.id = r.user_id
+            LEFT JOIN selection_scores s ON s.registration_id = r.id
             WHERE r.deleted_at IS NULL AND u.deleted_at IS NULL
             ORDER BY r.id ASC
             LIMIT 1
@@ -473,9 +487,11 @@ function current_student_data(array $sample): array
 function registration_for_user(int $userId): ?array
 {
     $stmt = db()->prepare('
-        SELECT r.*, u.name, u.email, u.phone
+        SELECT r.*, u.name, u.email, u.phone,
+               s.nilai_uts, s.nilai_uas, s.nilai_un, s.nilai_rata_rata
         FROM registrations r
         JOIN users u ON u.id = r.user_id
+        LEFT JOIN selection_scores s ON s.registration_id = r.id
         WHERE r.user_id = ? AND r.deleted_at IS NULL AND u.deleted_at IS NULL
         LIMIT 1
     ');
@@ -679,6 +695,18 @@ function save_student_form(array $input): bool
         trim($input['name'] ?? $user['name']),
         trim($input['phone'] ?? $user['phone']),
         $user['id'],
+    ]);
+
+    $scoreStmt = db()->prepare('
+        INSERT INTO selection_scores (registration_id, nilai_uts, nilai_uas, nilai_un)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE nilai_uts = VALUES(nilai_uts), nilai_uas = VALUES(nilai_uas), nilai_un = VALUES(nilai_un)
+    ');
+    $scoreStmt->execute([
+        $registration['id'],
+        (float) ($input['uts'] ?? 0),
+        (float) ($input['uas'] ?? 0),
+        (float) ($input['un'] ?? 0),
     ]);
 
     flash('success', 'Formulir pendaftaran berhasil disimpan.');
@@ -911,6 +939,38 @@ function confirm_re_registration(): bool
     return true;
 }
 
+function update_scores_and_selection(array $input): bool
+{
+    $registrationId = (int) ($input['registration_id'] ?? 0);
+    $status = $input['selection_status'] ?? 'Belum Diproses';
+    $note = trim($input['selection_note'] ?? '');
+    
+    if (! in_array($status, ['Belum Diproses', 'Diterima', 'Tidak Diterima', 'Cadangan'], true)) {
+        $status = 'Belum Diproses';
+    }
+
+    $uts = (float) ($input['uts'] ?? 0);
+    $uas = (float) ($input['uas'] ?? 0);
+    $un  = (float) ($input['un'] ?? 0);
+
+    $scoreStmt = db()->prepare('
+        INSERT INTO selection_scores (registration_id, nilai_uts, nilai_uas, nilai_un)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE nilai_uts = VALUES(nilai_uts), nilai_uas = VALUES(nilai_uas), nilai_un = VALUES(nilai_un)
+    ');
+    $scoreStmt->execute([$registrationId, $uts, $uas, $un]);
+
+    $stmt = db()->prepare('
+        UPDATE registrations 
+        SET selection_status = ?, selection_note = ?, selected_at = NOW() 
+        WHERE id = ?
+    ');
+    $stmt->execute([$status, $note, $registrationId]);
+
+    flash('success', 'Nilai dan keputusan seleksi berhasil disimpan.');
+    return true;
+}
+
 function update_selection_status(array $input): bool
 {
     $registrationId = (int) ($input['registration_id'] ?? 0);
@@ -1047,7 +1107,11 @@ function handle_post(string $page): void
     }
 
     if ($page === 'admin-verifikasi-berkas') {
-        update_document_verification($_POST);
+        if (($_POST['action'] ?? '') === 'update_scores') {
+            update_scores_and_selection($_POST);
+        } else {
+            update_document_verification($_POST);
+        }
         redirect_to('admin-verifikasi-berkas', ['id' => (int) ($_POST['registration_id'] ?? 0)]);
     }
 
