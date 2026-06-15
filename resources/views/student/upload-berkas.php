@@ -8,7 +8,12 @@
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div>
                                     <h5 class="font-weight-bold text-gray-800 mb-1"><?= e($document['name']) ?></h5>
-                                    <small class="text-muted"><?= e($document['file']) ?></small>
+                                    <small class="text-muted">
+                                        <?= e($document['file']) ?>
+                                        <?php if (!empty($document['file_path'])): ?>
+                                            (<a href="<?= e(url_for('view-berkas', ['id' => $document['id']])) ?>" target="_blank">Lihat</a>)
+                                        <?php endif; ?>
+                                    </small>
                                 </div>
                                 <span class="badge badge-<?= e(status_class($document['status'])) ?>"><?= e($document['status']) ?></span>
                             </div>

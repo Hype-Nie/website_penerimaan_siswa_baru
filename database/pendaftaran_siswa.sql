@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS users (
     role ENUM('siswa', 'admin', 'kepsek') NOT NULL DEFAULT 'siswa',
     status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS registrations (
@@ -35,13 +36,17 @@ CREATE TABLE IF NOT EXISTS registrations (
     form_status ENUM('Belum Mengisi', 'Sudah Dikirim', 'Menunggu Verifikasi') NOT NULL DEFAULT 'Belum Mengisi',
     document_status ENUM('Belum Upload', 'Menunggu Verifikasi', 'Berkas Lengkap', 'Berkas Tidak Lengkap') NOT NULL DEFAULT 'Belum Upload',
     selection_status ENUM('Belum Diproses', 'Diterima', 'Tidak Diterima', 'Cadangan') NOT NULL DEFAULT 'Belum Diproses',
+    re_registration_status ENUM('Belum Daftar Ulang', 'Sudah Daftar Ulang') NOT NULL DEFAULT 'Belum Daftar Ulang',
     admin_note TEXT NULL,
     selection_note TEXT NULL,
     submitted_at DATETIME NULL,
     selected_at DATETIME NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT registrations_user_id_foreign FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    CONSTRAINT registrations_user_id_foreign FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_registration_school_year (school_year),
+    INDEX idx_registration_status (selection_status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS documents (
@@ -82,6 +87,26 @@ CREATE TABLE IF NOT EXISTS settings (
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS requirements (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    requirement_text VARCHAR(255) NOT NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS selection_scores (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    registration_id INT UNSIGNED NOT NULL UNIQUE,
+    nilai_uts DECIMAL(5,2) NULL DEFAULT 0.00,
+    nilai_uas DECIMAL(5,2) NULL DEFAULT 0.00,
+    nilai_un DECIMAL(5,2) NULL DEFAULT 0.00,
+    nilai_rata_rata DECIMAL(5,2) GENERATED ALWAYS AS ((nilai_uts + nilai_uas + nilai_un) / 3) STORED,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT scores_registration_id_foreign FOREIGN KEY (registration_id) REFERENCES registrations(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS schedules (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     activity VARCHAR(150) NOT NULL,
@@ -90,12 +115,6 @@ CREATE TABLE IF NOT EXISTS schedules (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS requirements (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    requirement_text VARCHAR(180) NOT NULL,
-    sort_order INT NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT IGNORE INTO users (id, name, username, email, phone, password, role) VALUES
 (1, 'Administrator', 'admin', 'admin@psb.test', '081111111111', '$2y$10$euFVclUnojtx265N0uoVk.sORkfMVIWzxzo/IUbSQly9si/S0yTfG', 'admin'),

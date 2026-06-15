@@ -23,9 +23,10 @@
     <div class="card shadow">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-primary">Laporan Penerimaan Siswa Baru</h6>
-            <div>
-                <button class="btn btn-outline-primary btn-sm"><i class="fas fa-print"></i> Cetak</button>
-                <button class="btn btn-outline-danger btn-sm"><i class="fas fa-file-pdf"></i> Export PDF</button>
+            <div class="d-print-none">
+                <a href="<?= e(url_for('cetak-laporan')) ?>" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fas fa-print"></i> Cetak</a>
+                <a href="<?= e(url_for('export-pdf')) ?>" target="_blank" class="btn btn-outline-danger btn-sm"><i class="fas fa-file-pdf"></i> Export PDF</a>
+                <a href="<?= e(url_for('export-csv')) ?>" target="_blank" class="btn btn-outline-success btn-sm"><i class="fas fa-file-csv"></i> Export CSV</a>
             </div>
         </div>
         <div class="card-body">

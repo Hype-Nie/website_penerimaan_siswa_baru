@@ -33,7 +33,7 @@
                     </div>
                     <div class="form-group col-md-4">
                         <label>Tanggal Lahir</label>
-                        <input type="text" class="form-control strong-input" name="birth_date" value="<?= e($student['birth_date']) ?>" placeholder="dd-mm-yyyy">
+                        <input type="date" class="form-control strong-input" name="birth_date" value="<?= e($student['birth_date']) ?>">
                     </div>
                 </div>
                 <div class="form-row">
@@ -76,6 +76,22 @@
                     <div class="form-group col-md-6">
                         <label>Tahun Ajaran</label>
                         <input type="text" class="form-control strong-input" name="school_year" value="<?= e($data['school']['year']) ?>">
+                    </div>
+                </div>
+
+                <h5 class="form-section-title">Data Nilai</h5>
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label>Nilai UTS</label>
+                        <input type="number" step="0.01" min="0" max="100" class="form-control strong-input" name="uts" value="<?= e($student['uts'] ?? 0) ?>">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label>Nilai UAS</label>
+                        <input type="number" step="0.01" min="0" max="100" class="form-control strong-input" name="uas" value="<?= e($student['uas'] ?? 0) ?>">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label>Nilai UN</label>
+                        <input type="number" step="0.01" min="0" max="100" class="form-control strong-input" name="un" value="<?= e($student['un'] ?? 0) ?>">
                     </div>
                 </div>
 
