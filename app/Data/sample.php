@@ -114,9 +114,9 @@ return [
         ['step' => 'Hasil Seleksi', 'status' => 'Belum Tersedia'],
     ],
     'announcements' => [
-        ['title' => 'Pendaftaran Dibuka', 'date' => '01 Juni 2026', 'content' => 'Pendaftaran siswa baru dibuka mulai 1 Juni 2026.'],
-        ['title' => 'Batas Upload Berkas', 'date' => '20 Juni 2026', 'content' => 'Calon siswa wajib mengunggah dokumen persyaratan sebelum batas waktu.'],
-        ['title' => 'Hasil Seleksi', 'date' => '30 Juni 2026', 'content' => 'Hasil seleksi dapat dilihat melalui akun masing-masing setelah dipublikasikan.'],
+        ['id' => 1, 'title' => 'Pendaftaran Dibuka', 'date' => '01 Juni 2026', 'date_value' => '2026-06-01', 'content' => 'Pendaftaran siswa baru dibuka mulai 1 Juni 2026.'],
+        ['id' => 2, 'title' => 'Batas Upload Berkas', 'date' => '20 Juni 2026', 'date_value' => '2026-06-20', 'content' => 'Calon siswa wajib mengunggah dokumen persyaratan sebelum batas waktu.'],
+        ['id' => 3, 'title' => 'Hasil Seleksi', 'date' => '30 Juni 2026', 'date_value' => '2026-06-30', 'content' => 'Hasil seleksi dapat dilihat melalui akun masing-masing setelah dipublikasikan.'],
     ],
     'schedule' => [
         ['activity' => 'Registrasi Akun', 'date' => '01 - 15 Juni 2026'],

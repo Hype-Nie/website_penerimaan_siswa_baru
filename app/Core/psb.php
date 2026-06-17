@@ -804,6 +804,7 @@ function announcements(array $sample): array
             'id' => (int) $row['id'],
             'title' => $row['title'],
             'date' => format_date_id($row['announcement_date']),
+            'date_value' => substr((string) $row['announcement_date'], 0, 10),
             'content' => $row['content'],
         ];
     }, $rows);
@@ -1889,11 +1890,11 @@ function save_announcement(array $input): bool
 {
     $title = trim($input['title'] ?? '');
     $content = trim($input['content'] ?? '');
-    $date = normalize_date($input['announcement_date'] ?? date('Y-m-d')) ?: date('Y-m-d');
+    $date = normalize_date($input['announcement_date'] ?? '');
     $user = current_user();
 
-    if ($title === '' || $content === '') {
-        flash('danger', 'Judul dan isi pengumuman wajib diisi.');
+    if ($title === '' || $content === '' || ! $date) {
+        flash('danger', 'Judul, tanggal, dan isi pengumuman wajib diisi.');
         return false;
     }
 
@@ -1901,6 +1902,30 @@ function save_announcement(array $input): bool
     $stmt->execute([$title, $content, $date, $user['id'] ?? null]);
 
     flash('success', 'Pengumuman berhasil disimpan.');
+    return true;
+}
+
+function update_announcement(array $input): bool
+{
+    $id = (int) ($input['id'] ?? 0);
+    $title = trim($input['title'] ?? '');
+    $content = trim($input['content'] ?? '');
+    $date = normalize_date($input['announcement_date'] ?? '');
+
+    if ($id <= 0) {
+        flash('danger', 'Data pengumuman yang akan diedit tidak valid.');
+        return false;
+    }
+
+    if ($title === '' || $content === '' || ! $date) {
+        flash('danger', 'Judul, tanggal, dan isi pengumuman wajib diisi.');
+        return false;
+    }
+
+    $stmt = db()->prepare('UPDATE announcements SET title = ?, content = ?, announcement_date = ? WHERE id = ?');
+    $stmt->execute([$title, $content, $date, $id]);
+
+    flash('success', 'Pengumuman berhasil diperbarui.');
     return true;
 }
 
@@ -2019,6 +2044,8 @@ function handle_post(string $page): void
     if ($page === 'admin-pengumuman') {
         if (($_POST['action'] ?? '') === 'delete') {
             delete_announcement($_POST);
+        } elseif (($_POST['action'] ?? '') === 'update') {
+            update_announcement($_POST);
         } else {
             save_announcement($_POST);
         }
