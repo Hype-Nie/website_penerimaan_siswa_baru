@@ -27,6 +27,14 @@
         <i class="fas fa-angle-up"></i>
     </a>
 
+    <div class="psb-loading-overlay" data-loading-overlay aria-hidden="true">
+        <div class="psb-loading-box" role="status" aria-live="polite">
+            <div class="psb-loading-spinner" aria-hidden="true"></div>
+            <strong data-loading-title>Memproses Data</strong>
+            <p data-loading-text>Mohon tunggu, sistem sedang memproses data.</p>
+        </div>
+    </div>
+
     <?php require base_path('resources/views/layouts/partials/scripts.php'); ?>
 </body>
 </html>

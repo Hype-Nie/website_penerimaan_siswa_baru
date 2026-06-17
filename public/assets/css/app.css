@@ -564,6 +564,68 @@ body {
     margin: 1rem 0 0;
 }
 
+.psb-loading-active {
+    overflow: hidden;
+}
+
+.psb-loading-overlay {
+    align-items: center;
+    background: rgba(17, 24, 39, 0.58);
+    bottom: 0;
+    display: none;
+    justify-content: center;
+    left: 0;
+    padding: 1rem;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 3000;
+}
+
+.psb-loading-overlay.is-visible {
+    display: flex;
+}
+
+.psb-loading-box {
+    background: #ffffff;
+    border: 1px solid #e5e8f0;
+    border-radius: 6px;
+    box-shadow: 0 1.5rem 3rem rgba(17, 24, 39, 0.24);
+    max-width: 24rem;
+    padding: 1.5rem;
+    text-align: center;
+    width: 100%;
+}
+
+.psb-loading-spinner {
+    animation: psb-loading-spin 0.8s linear infinite;
+    border: 0.3rem solid #dbe4ff;
+    border-radius: 50%;
+    border-top-color: #2f55c7;
+    height: 3.2rem;
+    margin: 0 auto 1rem;
+    width: 3.2rem;
+}
+
+.psb-loading-box strong {
+    color: #202938;
+    display: block;
+    font-size: 1.1rem;
+    margin-bottom: 0.45rem;
+}
+
+.psb-loading-box p {
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0;
+}
+
+@keyframes psb-loading-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 @media (max-width: 991.98px) {
     .hero-section,
     .announcement-grid,

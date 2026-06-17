@@ -17,22 +17,27 @@
                     </thead>
                     <tbody>
                         <?php foreach ($data['applicants'] as $applicant): ?>
+                            <?php $readyForSelection = registration_ready_for_selection($applicant); ?>
                             <tr>
                                 <td><?= e($applicant['no']) ?></td>
                                 <td><?= e($applicant['name']) ?></td>
                                 <td><span class="badge badge-<?= e(status_class($applicant['document_status'])) ?>"><?= e($applicant['document_status']) ?></span></td>
-                                <td>
-                                    <form action="<?= e(url_for('admin-proses-seleksi')) ?>" method="post" class="form-inline">
-                                        <input type="hidden" name="registration_id" value="<?= e($applicant['id'] ?? 0) ?>">
-                                        <select class="form-control form-control-sm mr-2" name="selection_status">
-                                            <?php foreach (['Belum Diproses', 'Diterima', 'Tidak Diterima', 'Cadangan'] as $status): ?>
-                                                <option value="<?= e($status) ?>" <?= $applicant['selection_status'] === $status ? 'selected' : '' ?>><?= e($status) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                        <button class="btn btn-primary btn-sm" type="submit">Simpan</button>
-                                    </form>
-                                </td>
                                 <td><span class="badge badge-<?= e(status_class($applicant['selection_status'])) ?>"><?= e($applicant['selection_status']) ?></span></td>
+                                <td>
+                                    <?php if ($readyForSelection): ?>
+                                        <form action="<?= e(url_for('admin-proses-seleksi')) ?>" method="post" class="form-inline">
+                                            <input type="hidden" name="registration_id" value="<?= e($applicant['id'] ?? 0) ?>">
+                                            <select class="form-control form-control-sm mr-2" name="selection_status">
+                                                <?php foreach (['Belum Diproses', 'Diterima', 'Tidak Diterima', 'Cadangan'] as $status): ?>
+                                                    <option value="<?= e($status) ?>" <?= $applicant['selection_status'] === $status ? 'selected' : '' ?>><?= e($status) ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <button class="btn btn-primary btn-sm" type="submit">Simpan</button>
+                                        </form>
+                                    <?php else: ?>
+                                        <span class="text-muted">Menunggu formulir dan verifikasi berkas</span>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

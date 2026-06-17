@@ -874,6 +874,12 @@ function student_can_upload_documents(array $student): bool
     return ($student['document_status'] ?? 'Belum Upload') !== 'Berkas Lengkap';
 }
 
+function registration_ready_for_selection(array $registration): bool
+{
+    return ($registration['form_status'] ?? 'Belum Mengisi') !== 'Belum Mengisi'
+        && in_array($registration['document_status'] ?? 'Belum Upload', ['Berkas Lengkap', 'Berkas Tidak Lengkap'], true);
+}
+
 function psb_data(): array
 {
     $sample = sample_data();
@@ -1146,16 +1152,59 @@ function update_document_verification(array $input): bool
         $status = 'Menunggu Verifikasi';
     }
 
+    if (! find_registration_by_id($registrationId)) {
+        flash('danger', 'Data pendaftaran tidak ditemukan.');
+        return false;
+    }
+
+    $documentIds = [];
+
+    if (isset($input['document_ids']) && is_array($input['document_ids'])) {
+        $documentIds = array_values(array_unique(array_filter(array_map('intval', $input['document_ids']))));
+    } elseif (! empty($input['document_id'])) {
+        $documentIds = [(int) $input['document_id']];
+    }
+
+    $usesMultiSelection = ($input['document_selection_mode'] ?? '') === 'multi';
+    $verifyAll = ! empty($input['verify_all']) || (! $usesMultiSelection && $documentIds === []);
+    $documentNames = [];
+
+    if ($usesMultiSelection && ! $verifyAll && $documentIds === []) {
+        flash('warning', 'Pilih minimal satu dokumen atau centang semua dokumen yang sudah diupload.');
+        return false;
+    }
+
+    if ($verifyAll) {
+        $documentStmt = db()->prepare('SELECT document_type FROM documents WHERE registration_id = ? AND file_path IS NOT NULL ORDER BY id ASC');
+        $documentStmt->execute([$registrationId]);
+        $documentNames = array_column($documentStmt->fetchAll(), 'document_type');
+    } else {
+        $placeholders = implode(',', array_fill(0, count($documentIds), '?'));
+        $documentStmt = db()->prepare('SELECT id, document_type FROM documents WHERE registration_id = ? AND id IN (' . $placeholders . ') AND file_path IS NOT NULL ORDER BY id ASC');
+        $documentStmt->execute(array_merge([$registrationId], $documentIds));
+        $selectedDocuments = $documentStmt->fetchAll();
+        $documentIds = array_map(static function ($document) {
+            return (int) $document['id'];
+        }, $selectedDocuments);
+        $documentNames = array_column($selectedDocuments, 'document_type');
+    }
+
+    if ($documentNames === []) {
+        flash('warning', 'Pilih minimal satu dokumen yang sudah diupload untuk diverifikasi.');
+        return false;
+    }
+
     $stmt = db()->prepare('UPDATE registrations SET document_status = ?, admin_note = ? WHERE id = ?');
     $stmt->execute([$status, $note, $registrationId]);
 
-    if (! empty($input['document_id'])) {
+    if (! $verifyAll) {
+        $placeholders = implode(',', array_fill(0, count($documentIds), '?'));
         $stmt = db()->prepare('
             UPDATE documents
             SET status = ?, note = ?, verified_by = ?, verified_at = NOW()
-            WHERE id = ?
+            WHERE registration_id = ? AND id IN (' . $placeholders . ')
         ');
-        $stmt->execute([$status, $note, $user['id'] ?? null, (int) $input['document_id']]);
+        $stmt->execute(array_merge([$status, $note, $user['id'] ?? null, $registrationId], $documentIds));
     } else {
         $stmt = db()->prepare('
             UPDATE documents
@@ -1167,7 +1216,7 @@ function update_document_verification(array $input): bool
 
     flash('success', 'Status berkas berhasil diperbarui.');
     if (in_array($status, ['Berkas Lengkap', 'Berkas Tidak Lengkap'], true)) {
-        if (send_document_status_email($registrationId, $status, $note)) {
+        if (send_document_status_email($registrationId, $status, $note, $documentNames)) {
             flash('success', 'Email informasi status berkas berhasil dikirim ke pendaftar.');
         } else {
             $mailError = psb_mail_error();
@@ -1177,7 +1226,7 @@ function update_document_verification(array $input): bool
     return true;
 }
 
-function send_document_status_email(int $registrationId, string $status, string $note = ''): bool
+function send_document_status_email(int $registrationId, string $status, string $note = '', array $documentNames = []): bool
 {
     psb_mail_error('');
 
@@ -1193,22 +1242,156 @@ function send_document_status_email(int $registrationId, string $status, string 
         return false;
     }
 
-    $subject = 'Status Berkas Pendaftaran PSB';
-    $message = $status === 'Berkas Lengkap'
-        ? 'Berkas Anda sudah lengkap dan akan masuk ke proses seleksi.'
-        : 'Berkas Anda belum lengkap, silakan upload ulang dokumen yang diminta.';
-
-    if ($note !== '') {
-        $message .= "\n\nCatatan panitia: " . $note;
-    }
+    $subject = 'Informasi Status Berkas PSB - ' . $status;
+    $emailContent = build_document_status_email_content($registration, $status, $note, $documentNames);
 
     $mailer = strtolower((string) env_value('MAIL_MAILER', env_value('MAIL_HOST') ? 'smtp' : 'mail'));
 
     if ($mailer === 'smtp') {
-        return send_smtp_email($registration['email'], $subject, $message);
+        return send_smtp_email($registration['email'], $subject, $emailContent['text'], $emailContent['html']);
     }
 
-    return send_native_email($registration['email'], $subject, $message);
+    return send_native_email($registration['email'], $subject, $emailContent['text'], $emailContent['html']);
+}
+
+function build_document_status_email_content(array $registration, string $status, string $note = '', array $documentNames = []): array
+{
+    $isComplete = $status === 'Berkas Lengkap';
+    $schoolName = app_setting('school_name', 'Panitia PSB');
+    $statusColor = $isComplete ? '#15803d' : '#b91c1c';
+    $statusBg = $isComplete ? '#dcfce7' : '#fee2e2';
+    $statusBorder = $isComplete ? '#86efac' : '#fecaca';
+    $headline = $isComplete
+        ? 'Berkas pendaftaran Anda sudah lengkap.'
+        : 'Berkas pendaftaran Anda belum lengkap.';
+    $nextStep = $isComplete
+        ? 'Data Anda akan masuk ke tahap proses seleksi. Silakan pantau menu Hasil Seleksi secara berkala setelah hasil dipublikasikan.'
+        : 'Silakan login kembali ke akun pendaftar, buka menu Upload Berkas, lalu unggah ulang dokumen sesuai catatan panitia.';
+    $noteText = trim($note) !== '' ? trim($note) : 'Tidak ada catatan tambahan dari panitia.';
+    $safeSchoolName = e($schoolName);
+    $safeName = e($registration['name'] ?? '-');
+    $safeRegistrationNo = e($registration['registration_no'] ?? ($registration['no'] ?? '-'));
+    $safeStatus = e($status);
+    $safeHeadline = e($headline);
+    $safeNextStep = e($nextStep);
+    $safeNote = nl2br(e($noteText));
+    $safeDate = e(format_date_id(date('Y-m-d')));
+    $documentNames = array_values(array_filter(array_map('trim', $documentNames)));
+    $documentText = $documentNames !== []
+        ? implode("\n", array_map(static function ($documentName) {
+            return '- ' . $documentName;
+        }, $documentNames))
+        : '- Semua dokumen yang diunggah';
+    $documentItems = '';
+
+    foreach ($documentNames !== [] ? $documentNames : ['Semua dokumen yang diunggah'] as $documentName) {
+        $documentItems .= '<li style="margin:0 0 6px;">' . e($documentName) . '</li>';
+    }
+
+    $text = implode("\n", [
+        'Informasi Status Berkas PSB',
+        '',
+        'Nama: ' . ($registration['name'] ?? '-'),
+        'Nomor Pendaftaran: ' . ($registration['registration_no'] ?? ($registration['no'] ?? '-')),
+        'Status Berkas: ' . $status,
+        '',
+        $headline,
+        '',
+        'Dokumen yang diverifikasi:',
+        $documentText,
+        '',
+        'Langkah berikutnya:',
+        $nextStep,
+        '',
+        'Catatan panitia:',
+        $noteText,
+        '',
+        'Terima kasih.',
+        $schoolName,
+    ]);
+
+    $html = <<<HTML
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Informasi Status Berkas PSB</title>
+</head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#111827;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:24px 0;">
+        <tr>
+            <td align="center" style="padding:0 16px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;">
+                    <tr>
+                        <td style="background:#1d4ed8;padding:24px 28px;color:#ffffff;">
+                            <div style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;">{$safeSchoolName}</div>
+                            <div style="font-size:24px;line-height:1.3;font-weight:700;margin-top:8px;">Informasi Status Berkas PSB</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:28px;">
+                            <p style="margin:0 0 12px;font-size:15px;line-height:1.7;">Yth. <strong>{$safeName}</strong>,</p>
+                            <p style="margin:0 0 20px;font-size:15px;line-height:1.7;">Panitia telah memperbarui status berkas pendaftaran Anda.</p>
+
+                            <div style="border:1px solid {$statusBorder};background:{$statusBg};border-radius:8px;padding:18px 20px;margin-bottom:22px;">
+                                <div style="font-size:13px;color:#374151;margin-bottom:8px;">Status Berkas</div>
+                                <div style="display:inline-block;background:{$statusColor};color:#ffffff;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700;text-transform:uppercase;">{$safeStatus}</div>
+                                <div style="font-size:18px;line-height:1.45;font-weight:700;color:#111827;margin-top:14px;">{$safeHeadline}</div>
+                            </div>
+
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:22px;">
+                                <tr>
+                                    <td style="border:1px solid #e5e7eb;padding:12px 14px;background:#f9fafb;font-size:13px;color:#6b7280;width:42%;">Nomor Pendaftaran</td>
+                                    <td style="border:1px solid #e5e7eb;padding:12px 14px;font-size:14px;font-weight:700;color:#111827;">{$safeRegistrationNo}</td>
+                                </tr>
+                                <tr>
+                                    <td style="border:1px solid #e5e7eb;padding:12px 14px;background:#f9fafb;font-size:13px;color:#6b7280;">Nama Pendaftar</td>
+                                    <td style="border:1px solid #e5e7eb;padding:12px 14px;font-size:14px;font-weight:700;color:#111827;">{$safeName}</td>
+                                </tr>
+                                <tr>
+                                    <td style="border:1px solid #e5e7eb;padding:12px 14px;background:#f9fafb;font-size:13px;color:#6b7280;">Tanggal Informasi</td>
+                                    <td style="border:1px solid #e5e7eb;padding:12px 14px;font-size:14px;color:#111827;">{$safeDate}</td>
+                                </tr>
+                            </table>
+
+                            <div style="border:1px solid #e5e7eb;background:#f9fafb;border-radius:8px;padding:16px 18px;margin-bottom:18px;">
+                                <div style="font-size:14px;font-weight:700;color:#111827;margin-bottom:8px;">Dokumen yang Diverifikasi</div>
+                                <ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.6;color:#1f2937;">
+                                    {$documentItems}
+                                </ul>
+                            </div>
+
+                            <div style="border-left:4px solid #2563eb;background:#eff6ff;border-radius:6px;padding:16px 18px;margin-bottom:18px;">
+                                <div style="font-size:14px;font-weight:700;color:#1e3a8a;margin-bottom:6px;">Langkah Berikutnya</div>
+                                <div style="font-size:14px;line-height:1.7;color:#1f2937;">{$safeNextStep}</div>
+                            </div>
+
+                            <div style="border-left:4px solid #f59e0b;background:#fffbeb;border-radius:6px;padding:16px 18px;margin-bottom:24px;">
+                                <div style="font-size:14px;font-weight:700;color:#92400e;margin-bottom:6px;">Catatan Panitia</div>
+                                <div style="font-size:14px;line-height:1.7;color:#1f2937;">{$safeNote}</div>
+                            </div>
+
+                            <p style="margin:0;font-size:14px;line-height:1.7;color:#4b5563;">Email ini dikirim otomatis oleh sistem PSB. Silakan login ke akun pendaftar untuk melihat status terbaru.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:18px 28px;font-size:12px;line-height:1.6;color:#6b7280;">
+                            Hormat kami,<br>
+                            <strong style="color:#111827;">{$safeSchoolName}</strong>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+HTML;
+
+    return [
+        'text' => $text,
+        'html' => $html,
+    ];
 }
 
 function psb_mail_error(?string $message = null): string
@@ -1220,7 +1403,7 @@ function psb_mail_error(?string $message = null): string
     return $GLOBALS['psb_mail_error'] ?? '';
 }
 
-function send_native_email(string $to, string $subject, string $message): bool
+function send_native_email(string $to, string $subject, string $message, ?string $html = null): bool
 {
     $from = trim((string) env_value('MAIL_FROM', 'psb@example.test'));
     $fromName = trim((string) env_value('MAIL_FROM_NAME', config('app.name', 'Penerimaan Siswa Baru')));
@@ -1230,13 +1413,9 @@ function send_native_email(string $to, string $subject, string $message): bool
         return false;
     }
 
-    $headers = [
-        'From: ' . format_mail_address($from, $fromName),
-        'MIME-Version: 1.0',
-        'Content-Type: text/plain; charset=UTF-8',
-    ];
+    [$headers, $body] = build_email_headers_and_body($to, $from, $fromName, $subject, $message, $html, false);
 
-    if (@mail($to, encode_mail_subject($subject), $message, implode("\r\n", $headers))) {
+    if (@mail($to, encode_mail_subject($subject), $body, implode("\r\n", $headers))) {
         return true;
     }
 
@@ -1244,7 +1423,7 @@ function send_native_email(string $to, string $subject, string $message): bool
     return false;
 }
 
-function send_smtp_email(string $to, string $subject, string $message): bool
+function send_smtp_email(string $to, string $subject, string $message, ?string $html = null): bool
 {
     $host = trim((string) env_value('MAIL_HOST', ''));
     $port = (int) env_value('MAIL_PORT', 587);
@@ -1324,7 +1503,7 @@ function send_smtp_email(string $to, string $subject, string $message): bool
         return false;
     }
 
-    $payload = build_email_payload($to, $from, $fromName, $subject, $message);
+    $payload = build_email_payload($to, $from, $fromName, $subject, $message, $html);
     fwrite($socket, $payload . "\r\n.\r\n");
 
     if (! smtp_expect($socket, [250], 'mengirim isi email')) {
@@ -1388,25 +1567,68 @@ function smtp_read_response($socket): array
     return [(int) substr($response, 0, 3), $response];
 }
 
-function build_email_payload(string $to, string $from, string $fromName, string $subject, string $message): string
+function build_email_payload(string $to, string $from, string $fromName, string $subject, string $message, ?string $html = null): string
 {
     $domain = substr(strrchr($from, '@') ?: '@localhost', 1) ?: 'localhost';
-    $body = str_replace(["\r\n", "\r"], "\n", $message);
-    $body = str_replace("\n", "\r\n", $body);
-    $body = preg_replace('/^\./m', '..', $body);
-
-    $headers = [
-        'Date: ' . date(DATE_RFC2822),
-        'From: ' . format_mail_address($from, $fromName),
-        'To: <' . $to . '>',
-        'Subject: ' . encode_mail_subject($subject),
-        'Message-ID: <' . bin2hex(random_bytes(12)) . '@' . $domain . '>',
-        'MIME-Version: 1.0',
-        'Content-Type: text/plain; charset=UTF-8',
-        'Content-Transfer-Encoding: 8bit',
-    ];
+    [$headers, $body] = build_email_headers_and_body($to, $from, $fromName, $subject, $message, $html, true, $domain);
 
     return implode("\r\n", $headers) . "\r\n\r\n" . $body;
+}
+
+function build_email_headers_and_body(
+    string $to,
+    string $from,
+    string $fromName,
+    string $subject,
+    string $message,
+    ?string $html = null,
+    bool $includeSmtpHeaders = true,
+    string $domain = 'localhost'
+): array {
+    $plainBody = normalize_email_body($message);
+    $headers = [
+        'From: ' . format_mail_address($from, $fromName),
+        'MIME-Version: 1.0',
+    ];
+
+    if ($includeSmtpHeaders) {
+        array_unshift($headers, 'Date: ' . date(DATE_RFC2822));
+        $headers[] = 'To: <' . $to . '>';
+        $headers[] = 'Subject: ' . encode_mail_subject($subject);
+        $headers[] = 'Message-ID: <' . bin2hex(random_bytes(12)) . '@' . $domain . '>';
+    }
+
+    if ($html === null || trim($html) === '') {
+        $headers[] = 'Content-Type: text/plain; charset=UTF-8';
+        $headers[] = 'Content-Transfer-Encoding: 8bit';
+        return [$headers, preg_replace('/^\./m', '..', $plainBody)];
+    }
+
+    $boundary = '=_psb_' . bin2hex(random_bytes(12));
+    $htmlBody = normalize_email_body($html);
+    $headers[] = 'Content-Type: multipart/alternative; boundary="' . $boundary . '"';
+
+    $body = [
+        '--' . $boundary,
+        'Content-Type: text/plain; charset=UTF-8',
+        'Content-Transfer-Encoding: 8bit',
+        '',
+        $plainBody,
+        '--' . $boundary,
+        'Content-Type: text/html; charset=UTF-8',
+        'Content-Transfer-Encoding: 8bit',
+        '',
+        $htmlBody,
+        '--' . $boundary . '--',
+    ];
+
+    return [$headers, preg_replace('/^\./m', '..', implode("\r\n", $body))];
+}
+
+function normalize_email_body(string $body): string
+{
+    $body = str_replace(["\r\n", "\r"], "\n", $body);
+    return str_replace("\n", "\r\n", $body);
 }
 
 function format_mail_address(string $email, string $name = ''): string
@@ -1635,6 +1857,18 @@ function update_selection_status(array $input): bool
     $registrationId = (int) ($input['registration_id'] ?? 0);
     $status = $input['selection_status'] ?? 'Belum Diproses';
     $note = trim($input['selection_note'] ?? '');
+
+    $registration = find_registration_by_id($registrationId);
+
+    if (! $registration) {
+        flash('danger', 'Data pendaftaran tidak ditemukan.');
+        return false;
+    }
+
+    if (! registration_ready_for_selection($registration)) {
+        flash('warning', 'Status seleksi hanya dapat diproses jika formulir sudah dikirim dan berkas sudah selesai diverifikasi.');
+        return false;
+    }
 
     if (! in_array($status, ['Belum Diproses', 'Diterima', 'Tidak Diterima', 'Cadangan'], true)) {
         $status = 'Belum Diproses';
