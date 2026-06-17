@@ -2,7 +2,7 @@
 
 <main class="auth-page">
     <section class="auth-card auth-card-login">
-        <img class="auth-logo" src="<?= asset('img/logo-sekolah.svg') ?>" alt="Logo sekolah">
+        <img class="auth-logo" src="<?= asset('img/logo_utama.png') ?>" alt="Logo sekolah">
         <h1>Aplikasi Pendaftaran Siswa</h1>
 
         <?php if (($_GET['status'] ?? '') === 'logout'): ?>
