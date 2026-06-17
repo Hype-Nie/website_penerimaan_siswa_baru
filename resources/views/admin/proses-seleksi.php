@@ -10,7 +10,6 @@
                         <tr>
                             <th>No Pendaftaran</th>
                             <th>Nama</th>
-                            <th>Rata-rata</th>
                             <th>Status Berkas</th>
                             <th>Status Seleksi</th>
                             <th>Aksi</th>
@@ -21,7 +20,6 @@
                             <tr>
                                 <td><?= e($applicant['no']) ?></td>
                                 <td><?= e($applicant['name']) ?></td>
-                                <td><?= e(number_format($applicant['average'], 2)) ?></td>
                                 <td><span class="badge badge-<?= e(status_class($applicant['document_status'])) ?>"><?= e($applicant['document_status']) ?></span></td>
                                 <td>
                                     <form action="<?= e(url_for('admin-proses-seleksi')) ?>" method="post" class="form-inline">
@@ -31,7 +29,6 @@
                                                 <option value="<?= e($status) ?>" <?= $applicant['selection_status'] === $status ? 'selected' : '' ?>><?= e($status) ?></option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <input type="text" class="form-control form-control-sm mr-2" name="selection_note" placeholder="Keterangan">
                                         <button class="btn btn-primary btn-sm" type="submit">Simpan</button>
                                     </form>
                                 </td>

@@ -3,6 +3,13 @@
 require BASE_PATH . '/app/Helpers/functions.php';
 
 if (session_status() === PHP_SESSION_NONE) {
+    $sessionPath = base_path('storage/sessions');
+
+    if (! is_dir($sessionPath)) {
+        mkdir($sessionPath, 0775, true);
+    }
+
+    session_save_path($sessionPath);
     session_start();
 }
 

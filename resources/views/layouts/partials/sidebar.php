@@ -10,7 +10,6 @@ $sidebars = [
             ['page' => 'siswa-dashboard', 'label' => 'Dashboard', 'icon' => 'fa-tachometer-alt'],
             ['page' => 'siswa-formulir', 'label' => 'Formulir Pendaftaran', 'icon' => 'fa-file-alt'],
             ['page' => 'siswa-upload-berkas', 'label' => 'Upload Berkas', 'icon' => 'fa-upload'],
-            ['page' => 'siswa-status', 'label' => 'Status Pendaftaran', 'icon' => 'fa-tasks'],
             ['page' => 'siswa-hasil', 'label' => 'Hasil Seleksi', 'icon' => 'fa-bullhorn'],
             ['page' => 'siswa-profil', 'label' => 'Profil', 'icon' => 'fa-user'],
         ],

@@ -15,6 +15,20 @@ if ($page === 'logout') {
     exit;
 }
 
+if ($page === 'template-surat-pernyataan-daftar-ulang' || $page === 'download-template-surat-pernyataan-daftar-ulang') {
+    $download = $page === 'download-template-surat-pernyataan-daftar-ulang';
+
+    if ($download) {
+        header('Content-Type: application/msword; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="template-surat-pernyataan-daftar-ulang.doc"');
+    } else {
+        header('Content-Type: text/html; charset=UTF-8');
+    }
+
+    echo re_registration_statement_template_html(! $download);
+    exit;
+}
+
 if ($page === 'view-berkas') {
     $user = current_user();
     if (!$user || !in_array($user['role'], ['admin', 'kepsek', 'siswa'], true)) {
@@ -33,6 +47,45 @@ if ($page === 'view-berkas') {
     $doc = $stmt->fetch();
 
     if (!$doc || ($user['role'] === 'siswa' && (int)$user['id'] !== (int)$doc['user_id'])) {
+        http_response_code(404);
+        exit('Berkas tidak ditemukan atau Anda tidak memiliki akses.');
+    }
+
+    $path = base_path($doc['file_path']);
+    if (file_exists($path)) {
+        header('Content-Type: ' . mime_content_type($path));
+        header('Content-Disposition: inline; filename="' . $doc['original_name'] . '"');
+        readfile($path);
+        exit;
+    }
+
+    http_response_code(404);
+    exit('File fisik tidak ditemukan.');
+}
+
+if ($page === 'view-daftar-ulang-berkas') {
+    $user = current_user();
+    if (!$user || !in_array($user['role'], ['admin', 'kepsek', 'siswa'], true)) {
+        http_response_code(403);
+        exit('Forbidden');
+    }
+
+    if (!db_available() || !re_registration_schema_ready()) {
+        http_response_code(404);
+        exit('Struktur database daftar ulang belum tersedia.');
+    }
+
+    $docId = (int)($_GET['id'] ?? 0);
+    $stmt = db()->prepare('
+        SELECT d.file_path, d.original_name, r.user_id
+        FROM re_registration_documents d
+        JOIN registrations r ON r.id = d.registration_id
+        WHERE d.id = ? LIMIT 1
+    ');
+    $stmt->execute([$docId]);
+    $doc = $stmt->fetch();
+
+    if (!$doc || empty($doc['file_path']) || ($user['role'] === 'siswa' && (int)$user['id'] !== (int)$doc['user_id'])) {
         http_response_code(404);
         exit('Berkas tidak ditemukan atau Anda tidak memiliki akses.');
     }

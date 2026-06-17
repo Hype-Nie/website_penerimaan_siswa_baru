@@ -4,6 +4,8 @@ CREATE DATABASE IF NOT EXISTS pendaftaran_siswa
 
 USE pendaftaran_siswa;
 
+DROP TABLE IF EXISTS selection_scores;
+
 CREATE TABLE IF NOT EXISTS users (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
@@ -36,17 +38,23 @@ CREATE TABLE IF NOT EXISTS registrations (
     form_status ENUM('Belum Mengisi', 'Sudah Dikirim', 'Menunggu Verifikasi') NOT NULL DEFAULT 'Belum Mengisi',
     document_status ENUM('Belum Upload', 'Menunggu Verifikasi', 'Berkas Lengkap', 'Berkas Tidak Lengkap') NOT NULL DEFAULT 'Belum Upload',
     selection_status ENUM('Belum Diproses', 'Diterima', 'Tidak Diterima', 'Cadangan') NOT NULL DEFAULT 'Belum Diproses',
-    re_registration_status ENUM('Belum Daftar Ulang', 'Sudah Daftar Ulang') NOT NULL DEFAULT 'Belum Daftar Ulang',
+    re_registration_status ENUM('Belum Daftar Ulang', 'Dikirim', 'Dikonfirmasi') NOT NULL DEFAULT 'Belum Daftar Ulang',
+    student_identity_no VARCHAR(30) NULL,
     admin_note TEXT NULL,
     selection_note TEXT NULL,
     submitted_at DATETIME NULL,
     selected_at DATETIME NULL,
+    re_registered_at DATETIME NULL,
+    re_registration_confirmed_at DATETIME NULL,
+    re_registration_confirmed_by INT UNSIGNED NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL DEFAULT NULL,
     CONSTRAINT registrations_user_id_foreign FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT registrations_re_registration_confirmed_by_foreign FOREIGN KEY (re_registration_confirmed_by) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_registration_school_year (school_year),
-    INDEX idx_registration_status (selection_status)
+    INDEX idx_registration_status (selection_status),
+    INDEX idx_registration_student_identity_no (student_identity_no)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS documents (
@@ -65,6 +73,25 @@ CREATE TABLE IF NOT EXISTS documents (
     UNIQUE KEY documents_registration_type_unique (registration_id, document_type),
     CONSTRAINT documents_registration_id_foreign FOREIGN KEY (registration_id) REFERENCES registrations(id) ON DELETE CASCADE,
     CONSTRAINT documents_verified_by_foreign FOREIGN KEY (verified_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS re_registration_documents (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    registration_id INT UNSIGNED NOT NULL,
+    document_type VARCHAR(100) NOT NULL,
+    file_name VARCHAR(255) NULL,
+    original_name VARCHAR(255) NULL,
+    file_path VARCHAR(255) NULL,
+    status ENUM('Belum Upload', 'Dikirim', 'Dikonfirmasi') NOT NULL DEFAULT 'Belum Upload',
+    note TEXT NULL,
+    uploaded_at DATETIME NULL,
+    verified_by INT UNSIGNED NULL,
+    verified_at DATETIME NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY re_registration_documents_registration_type_unique (registration_id, document_type),
+    CONSTRAINT re_registration_documents_registration_id_foreign FOREIGN KEY (registration_id) REFERENCES registrations(id) ON DELETE CASCADE,
+    CONSTRAINT re_registration_documents_verified_by_foreign FOREIGN KEY (verified_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS announcements (
@@ -93,18 +120,6 @@ CREATE TABLE IF NOT EXISTS requirements (
     sort_order INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS selection_scores (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    registration_id INT UNSIGNED NOT NULL UNIQUE,
-    nilai_uts DECIMAL(5,2) NULL DEFAULT 0.00,
-    nilai_uas DECIMAL(5,2) NULL DEFAULT 0.00,
-    nilai_un DECIMAL(5,2) NULL DEFAULT 0.00,
-    nilai_rata_rata DECIMAL(5,2) GENERATED ALWAYS AS ((nilai_uts + nilai_uas + nilai_un) / 3) STORED,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT scores_registration_id_foreign FOREIGN KEY (registration_id) REFERENCES registrations(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS schedules (
@@ -138,6 +153,11 @@ INSERT IGNORE INTO documents (registration_id, document_type, file_name, origina
 (1, 'Ijazah / SKL', NULL, NULL, NULL, 'Belum Upload', NULL),
 (1, 'KTP Orang Tua', NULL, NULL, NULL, 'Belum Upload', NULL);
 
+INSERT IGNORE INTO re_registration_documents (registration_id, document_type, file_name, original_name, file_path, status, note) VALUES
+(1, 'Surat Pernyataan Daftar Ulang', NULL, NULL, NULL, 'Belum Upload', NULL),
+(1, 'Bukti Transfer Daftar Ulang', NULL, NULL, NULL, 'Belum Upload', NULL),
+(1, 'Pas Foto Terbaru', NULL, NULL, NULL, 'Belum Upload', NULL);
+
 INSERT IGNORE INTO announcements (id, title, content, announcement_date, created_by) VALUES
 (1, 'Pendaftaran Dibuka', 'Pendaftaran siswa baru dibuka mulai 1 Juni 2026.', '2026-06-01', 1),
 (2, 'Batas Upload Berkas', 'Calon siswa wajib mengunggah dokumen persyaratan sebelum batas waktu.', '2026-06-20', 1),
@@ -150,6 +170,7 @@ INSERT IGNORE INTO settings (key_name, value) VALUES
 ('school_year', '2026/2027'),
 ('registration_period', '01 Juni 2026 - 30 Juni 2026'),
 ('student_quota', '40'),
+('re_registration_fee', '1000000'),
 ('contact_phone', '0812-3456-7890'),
 ('contact_email', 'psb@miirsyadulathfal.sch.id'),
 ('school_address', 'Jl. Pendidikan No. 12, Kota Contoh'),

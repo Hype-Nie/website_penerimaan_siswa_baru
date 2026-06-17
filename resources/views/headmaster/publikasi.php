@@ -38,7 +38,7 @@
                                 <td><span class="badge badge-<?= e(status_class($applicant['selection_status'])) ?>"><?= e($applicant['selection_status']) ?></span></td>
                                 <td>
                                     <?php if ($applicant['selection_status'] === 'Diterima'): ?>
-                                        <span class="badge badge-<?= $applicant['re_registration_status'] === 'Sudah Daftar Ulang' ? 'success' : 'warning' ?>"><?= e($applicant['re_registration_status']) ?></span>
+                                        <span class="badge badge-<?= e(status_class($applicant['re_registration_status'])) ?>"><?= e($applicant['re_registration_status']) ?></span>
                                     <?php else: ?>
                                         -
                                     <?php endif; ?>
