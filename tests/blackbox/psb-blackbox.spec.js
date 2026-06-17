@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const { test, expect } = require('@playwright/test');
 
 const student = {
@@ -77,7 +78,8 @@ test.describe.serial('Blackbox alur utama PSB', () => {
     await page.locator('[name="name"]').fill(student.name);
     await page.locator('[name="birth_place"]').fill('Lamongan');
     await page.locator('[name="birth_date"]').fill('2018-08-19');
-    await page.getByLabel('Laki Laki').check();
+    await page.locator('label[for="genderMale"]').click();
+    await expect(page.locator('#genderMale')).toBeChecked();
     await page.locator('[name="religion"]').selectOption({ label: 'Islam' });
     await page.locator('[name="address"]').fill('Jl. Blackbox No. 1');
     await page.locator('[name="email"]').fill(student.email);
@@ -122,7 +124,8 @@ test.describe.serial('Blackbox alur utama PSB', () => {
     await expect(dataRow).toBeVisible();
     await dataRow.getByRole('link', { name: 'Verifikasi' }).click();
 
-    await page.getByLabel('Semua dokumen yang sudah diupload').check();
+    await page.locator('label[for="verify-all-documents"]').click();
+    await expect(page.locator('#verify-all-documents')).toBeChecked();
     await page.locator('[name="document_status"]').selectOption('Berkas Lengkap');
     await page.locator('[name="note"]').fill('Semua dokumen sudah sesuai.');
     await submitWithConfirm(page, /Simpan & Kirim/);
@@ -170,9 +173,13 @@ test.describe.serial('Blackbox alur utama PSB', () => {
 
     await logout(page);
     await login(page, headmaster.email, headmaster.password, 'Rekap Status Berkas');
-    const csvResponse = await page.goto('/?page=export-csv');
-    expect(csvResponse.ok()).toBeTruthy();
-    expect(await csvResponse.text()).toContain('No Pendaftaran');
+    await page.goto('/?page=kepsek-laporan');
+    const csvDownloadPromise = page.waitForEvent('download');
+    await page.getByRole('link', { name: /Export CSV/ }).click();
+    const csvDownload = await csvDownloadPromise;
+    expect(csvDownload.suggestedFilename()).toBe('Laporan_Penerimaan_Siswa_Baru.csv');
+    const csvPath = await csvDownload.path();
+    expect(fs.readFileSync(csvPath, 'utf8')).toContain('No Pendaftaran');
 
     await page.goto('/?page=kepsek-publikasi');
     await page.getByRole('button', { name: /Publikasikan/ }).click();
@@ -186,7 +193,7 @@ test.describe.serial('Blackbox alur utama PSB', () => {
     await login(page, student.email, student.password, 'Formulir');
     await page.goto('/?page=siswa-hasil');
     await expect(page.locator('.selection-status-highlight')).toHaveText('Diterima');
-    await expect(page.getByText('Biaya daftar ulang: Rp 1.000.000')).toBeVisible();
+    await expect(page.getByText(/Biaya daftar ulang:\s*Rp\s?1\.000\.000/)).toBeVisible();
     await expect(page.getByRole('link', { name: 'di sini' }).first()).toBeVisible();
 
     await setAllFileInputs(page);
@@ -199,11 +206,11 @@ test.describe.serial('Blackbox alur utama PSB', () => {
     const resultRow = page.getByRole('row').filter({ hasText: student.name });
     await expect(resultRow).toBeVisible();
     await resultRow.getByRole('link', { name: /Cek Berkas Daftar Ulang/ }).click();
-    await expect(page.getByText('Berkas Daftar Ulang')).toBeVisible();
+    await expect(page.getByRole('heading', { name: new RegExp(`Berkas Daftar Ulang - ${student.name}`) })).toBeVisible();
     await page.getByRole('button', { name: /Konfirmasi Daftar Ulang/ }).click();
     await confirmAction(page);
     await expect(page.getByText(/Daftar ulang sudah dikonfirmasi/i)).toBeVisible();
-    await expect(page.getByText(/Nomor induk siswa/i)).toBeVisible();
+    await expect(page.locator('.alert-success.mb-0')).toContainText(/Nomor induk siswa/i);
 
     await logout(page);
     await login(page, student.email, student.password, 'Formulir');
