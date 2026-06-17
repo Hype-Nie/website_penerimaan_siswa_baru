@@ -2,7 +2,7 @@
 
 <header class="guest-navbar">
     <a class="guest-brand" href="<?= e(url_for('beranda')) ?>">
-        <img src="<?= asset('img/logo-sekolah.svg') ?>" alt="Logo sekolah">
+        <img src="<?= asset('img/logo_utama.png') ?>" alt="Logo sekolah">
         <span><?= e($school['short_name']) ?></span>
     </a>
     <nav>
@@ -80,7 +80,7 @@
     <div class="footer-grid">
         <div class="footer-col">
             <a class="footer-brand" href="<?= e(url_for('beranda')) ?>">
-                <img src="<?= asset('img/logo-sekolah.svg') ?>" alt="Logo sekolah">
+                <img src="<?= asset('img/logo_utama.png') ?>" alt="Logo sekolah">
                 <span><?= e($school['short_name']) ?></span>
             </a>
             <p><?= e($school['name']) ?> berkomitmen untuk mencetak generasi yang unggul, berprestasi, dan berakhlak mulia melalui pendidikan berkualitas.</p>

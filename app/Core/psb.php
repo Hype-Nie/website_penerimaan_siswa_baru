@@ -1324,7 +1324,7 @@ function build_document_status_email_content(array $registration, string $status
             <td align="center" style="padding:0 16px;">
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;">
                     <tr>
-                        <td style="background:#1d4ed8;padding:24px 28px;color:#ffffff;">
+                        <td style="background:#047857;padding:24px 28px;color:#ffffff;">
                             <div style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;">{$safeSchoolName}</div>
                             <div style="font-size:24px;line-height:1.3;font-weight:700;margin-top:8px;">Informasi Status Berkas PSB</div>
                         </td>
