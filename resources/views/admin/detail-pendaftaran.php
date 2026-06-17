@@ -39,10 +39,6 @@ $applicant = find_registration_by_id($_GET['id'] ?? 0) ?: ($data['applicants'][0
                         <span>Berkas</span>
                         <span class="badge badge-<?= e(status_class($applicant['document_status'])) ?>"><?= e($applicant['document_status']) ?></span>
                     </div>
-                    <div class="form-group mt-3">
-                        <label>Catatan Admin</label>
-                        <textarea class="form-control strong-input" rows="5"><?= e($applicant['admin_note']) ?></textarea>
-                    </div>
                     <a class="btn btn-primary btn-block" href="<?= e(url_for('admin-verifikasi-berkas', ['id' => $applicant['id']])) ?>">Lanjut Verifikasi</a>
                 </div>
             </div>

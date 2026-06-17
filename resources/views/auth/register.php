@@ -5,7 +5,7 @@
         <h1>Registrasi Siswa Baru</h1>
         <h2><?= e($school['name']) ?></h2>
 
-        <form action="<?= e(url_for('registrasi')) ?>" method="post">
+        <form action="<?= e(url_for('registrasi')) ?>" method="post" data-confirm="Pastikan data registrasi akun sudah benar sebelum dikirim.">
             <div class="form-group">
                 <label>Nama</label>
                 <input type="text" class="form-control strong-input" name="name" placeholder="Masukkan Nama" required>

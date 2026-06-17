@@ -1,4 +1,13 @@
-<?php $stats = $data['stats']; ?>
+<?php
+$stats = $data['stats'];
+$totalDocuments = (int) ($stats['total_pendaftar'] ?? 0);
+$documentStatusRows = [
+    ['label' => 'Berkas Lengkap', 'value' => (int) ($stats['berkas_lengkap'] ?? 0), 'color' => 'success'],
+    ['label' => 'Menunggu Verifikasi', 'value' => (int) ($stats['menunggu_verifikasi'] ?? 0), 'color' => 'warning'],
+    ['label' => 'Berkas Tidak Lengkap', 'value' => (int) ($stats['berkas_tidak_lengkap'] ?? 0), 'color' => 'danger'],
+    ['label' => 'Belum Upload', 'value' => (int) ($stats['belum_upload'] ?? 0), 'color' => 'secondary'],
+];
+?>
 
 <div class="container-fluid">
     <div class="row">
@@ -43,24 +52,21 @@
                     <h6 class="m-0 font-weight-bold text-primary">Rekap Status Berkas</h6>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <div class="small mb-1">Berkas Lengkap</div>
-                        <div class="progress">
-                            <div class="progress-bar bg-success" style="width: 60%">60%</div>
+                    <?php foreach ($documentStatusRows as $index => $row): ?>
+                        <?php
+                        $percentage = $totalDocuments > 0 ? (int) round(($row['value'] / $totalDocuments) * 100) : 0;
+                        $percentage = max(0, min(100, $percentage));
+                        ?>
+                        <div class="<?= $index < count($documentStatusRows) - 1 ? 'mb-3' : '' ?>">
+                            <div class="small mb-1 d-flex justify-content-between">
+                                <span><?= e($row['label']) ?></span>
+                                <span><?= e($row['value']) ?> data - <?= e($percentage) ?>%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-<?= e($row['color']) ?>" style="width: <?= e($percentage) ?>%"><?= e($percentage) ?>%</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="small mb-1">Menunggu Verifikasi</div>
-                        <div class="progress">
-                            <div class="progress-bar bg-warning" style="width: 30%">30%</div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="small mb-1">Tidak Lengkap</div>
-                        <div class="progress">
-                            <div class="progress-bar bg-danger" style="width: 10%">10%</div>
-                        </div>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>
@@ -77,4 +83,3 @@
         </div>
     </div>
 </div>
-

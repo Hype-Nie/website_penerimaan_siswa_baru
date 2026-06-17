@@ -74,6 +74,60 @@ Konfigurasi default database ada di:
 
 Jika konfigurasi MySQL berbeda, buat file `.env` dari `.env.example`, lalu sesuaikan `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD`.
 
+Jika database sudah pernah di-import sebelumnya, jalankan file update berikut sekali melalui phpMyAdmin:
+
+```text
+database/update_daftar_ulang.sql
+```
+
+Jika file update daftar ulang sebelumnya sudah sempat dijalankan, lalu ingin menyesuaikan nama berkas menjadi `Bukti Transfer Daftar Ulang`, jalankan:
+
+```text
+database/update_daftar_ulang_berkas.sql
+```
+
+## Email Status Berkas
+
+Saat admin mengubah status berkas menjadi `Berkas Lengkap` atau `Berkas Tidak Lengkap`, sistem akan mencoba mengirim email ke pendaftar. Aktifkan pengiriman email di `.env`:
+
+```text
+MAIL_ENABLED=true
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_ENCRYPTION=tls
+MAIL_USERNAME=akunpsb@gmail.com
+MAIL_PASSWORD=app_password_gmail_16_digit
+MAIL_FROM=akunpsb@gmail.com
+MAIL_FROM_NAME="PSB MI Irsyadul Athfal"
+```
+
+Untuk Gmail, aktifkan 2-Step Verification di akun Gmail, lalu buat App Password. Gunakan App Password tersebut pada `MAIL_PASSWORD`, bukan password login Gmail biasa.
+
+## Blackbox Testing
+
+Project menyediakan rencana dan automation blackbox berbasis Playwright.
+
+Setup pertama:
+
+```bash
+copy .env.blackbox.example .env.blackbox
+npm install
+npx playwright install chromium
+```
+
+Sesuaikan `DB_USERNAME` dan `DB_PASSWORD` di `.env.blackbox`. Jika `php` atau `mysql` belum ada di PATH, isi `PHP_BIN` dan `MYSQL_BIN` dengan path executable Laragon, lalu jalankan:
+
+```bash
+npm run test:blackbox
+```
+
+Test akan mereset database `pendaftaran_siswa_blackbox`, menjalankan server PHP lokal di `http://127.0.0.1:8010`, lalu menguji alur utama dari UI. Detail skenario ada di:
+
+```text
+docs/blackbox-test-cases.md
+```
+
 ## Route Halaman
 
 Halaman umum:
@@ -122,19 +176,19 @@ Akun awal setelah import SQL:
 
 ```text
 Admin:
-username: admin
+email: admin@psb.test
 password: password
 
 Kepala Sekolah:
-username: kepsek
+email: kepsek@psb.test
 password: password
 
 Calon Siswa:
-username: siswa
+email: siswa@psb.test
 password: password
 ```
 
-Login memakai database dan akan mengarahkan user ke dashboard sesuai role.
+Login memakai email dan password dari database, lalu mengarahkan user ke dashboard sesuai role.
 
 ## Integrasi SB Admin
 

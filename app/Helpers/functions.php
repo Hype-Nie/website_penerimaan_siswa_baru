@@ -75,8 +75,12 @@ if (! function_exists('status_class')) {
             return 'danger';
         }
 
-        if (strpos($normalized, 'diterima') !== false || strpos($normalized, 'lengkap') !== false || strpos($normalized, 'selesai') !== false || strpos($normalized, 'lulus') !== false) {
+        if (strpos($normalized, 'diterima') !== false || strpos($normalized, 'lengkap') !== false || strpos($normalized, 'selesai') !== false || strpos($normalized, 'lulus') !== false || strpos($normalized, 'dikonfirmasi') !== false || strpos($normalized, 'terdaftar') !== false || strpos($normalized, 'sudah daftar ulang') !== false) {
             return 'success';
+        }
+
+        if (strpos($normalized, 'dikirim') !== false) {
+            return 'info';
         }
 
         if (strpos($normalized, 'menunggu') !== false || strpos($normalized, 'belum') !== false || strpos($normalized, 'cadangan') !== false) {

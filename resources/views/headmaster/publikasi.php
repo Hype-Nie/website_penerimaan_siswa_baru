@@ -5,7 +5,7 @@
             <h2><?= $data['results_published'] ? 'Sudah Dipublikasikan' : 'Belum Dipublikasikan' ?></h2>
             <p>Setelah hasil dipublikasikan, calon siswa dapat melihat hasil seleksi melalui akun masing-masing.</p>
         </div>
-        <form action="<?= e(url_for('kepsek-publikasi')) ?>" method="post">
+        <form action="<?= e(url_for('kepsek-publikasi')) ?>" method="post" data-confirm="<?= $data['results_published'] ? 'Batalkan publikasi hasil seleksi? Calon siswa tidak dapat melihat hasil seleksi sampai dipublikasikan kembali.' : 'Pastikan hasil seleksi sudah final sebelum dipublikasikan ke calon siswa. Lanjutkan publikasi?' ?>">
             <?php if ($data['results_published']): ?>
                 <input type="hidden" name="action" value="unpublish">
                 <button class="btn btn-warning btn-lg" type="submit"><i class="fas fa-times-circle"></i> Batalkan Publikasi</button>
@@ -38,7 +38,7 @@
                                 <td><span class="badge badge-<?= e(status_class($applicant['selection_status'])) ?>"><?= e($applicant['selection_status']) ?></span></td>
                                 <td>
                                     <?php if ($applicant['selection_status'] === 'Diterima'): ?>
-                                        <span class="badge badge-<?= $applicant['re_registration_status'] === 'Sudah Daftar Ulang' ? 'success' : 'warning' ?>"><?= e($applicant['re_registration_status']) ?></span>
+                                        <span class="badge badge-<?= e(status_class($applicant['re_registration_status'])) ?>"><?= e($applicant['re_registration_status']) ?></span>
                                     <?php else: ?>
                                         -
                                     <?php endif; ?>

@@ -43,10 +43,8 @@
                             <th>No</th>
                             <th>Nama</th>
                             <th>Alamat</th>
-                            <th>UTS</th>
-                            <th>UAS</th>
-                            <th>UN</th>
-                            <th>Rata-rata</th>
+                            <th>Status Formulir</th>
+                            <th>Status Berkas</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -56,11 +54,9 @@
                                 <td><?= $index + 1 ?></td>
                                 <td><?= e($applicant['name']) ?></td>
                                 <td><?= e($applicant['address']) ?></td>
-                                <td><?= e($applicant['uts']) ?></td>
-                                <td><?= e($applicant['uas']) ?></td>
-                                <td><?= e($applicant['un']) ?></td>
-                                <td><?= e(number_format($applicant['average'], 2)) ?></td>
-                                <td><span class="badge badge-info">Baru</span></td>
+                                <td><span class="badge badge-<?= e(status_class($applicant['form_status'])) ?>"><?= e($applicant['form_status']) ?></span></td>
+                                <td><span class="badge badge-<?= e(status_class($applicant['document_status'])) ?>"><?= e($applicant['document_status']) ?></span></td>
+                                <td><span class="badge badge-<?= e(status_class($applicant['selection_status'])) ?>"><?= e($applicant['selection_status']) ?></span></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -69,4 +65,3 @@
         </div>
     </div>
 </div>
-

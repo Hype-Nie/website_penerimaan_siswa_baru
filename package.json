@@ -1,0 +1,13 @@
+{
+  "name": "website-penerimaan-siswa-baru",
+  "private": true,
+  "scripts": {
+    "test:blackbox:reset-db": "node tests/scripts/reset-blackbox-db.js",
+    "test:blackbox": "npm run test:blackbox:reset-db && playwright test",
+    "test:blackbox:headed": "npm run test:blackbox:reset-db && playwright test --headed",
+    "test:blackbox:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.45.0"
+  }
+}

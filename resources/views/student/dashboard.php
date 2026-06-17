@@ -77,11 +77,9 @@
                 <div class="card-body quick-menu">
                     <a href="<?= e(url_for('siswa-formulir')) ?>"><i class="fas fa-edit"></i> Isi Formulir</a>
                     <a href="<?= e(url_for('siswa-upload-berkas')) ?>"><i class="fas fa-upload"></i> Upload Berkas</a>
-                    <a href="<?= e(url_for('siswa-status')) ?>"><i class="fas fa-tasks"></i> Cek Status</a>
                     <a href="<?= e(url_for('siswa-hasil')) ?>"><i class="fas fa-award"></i> Hasil Seleksi</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
