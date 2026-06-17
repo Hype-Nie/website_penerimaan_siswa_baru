@@ -90,13 +90,6 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Jika database lama sudah pernah dipakai sebelum fitur daftar ulang, jalankan file update berikut sekali melalui phpMyAdmin:
-
-```text
-database/update_daftar_ulang.sql
-database/update_daftar_ulang_berkas.sql
-```
-
 Untuk instalasi baru, cukup import `database/pendaftaran_siswa.sql`.
 
 ## Konfigurasi Email
@@ -119,8 +112,6 @@ MAIL_TIMEOUT=20
 ```
 
 Untuk Gmail, aktifkan 2-Step Verification lalu buat App Password. Gunakan App Password pada `MAIL_PASSWORD`, bukan password login Gmail.
-
-Catatan: logo tidak dipasang di template email karena beberapa email client memblokir gambar eksternal atau tidak bisa mengakses URL lokal.
 
 ## Akun Demo
 
@@ -219,7 +210,7 @@ npm install
 npx playwright install chromium
 ```
 
-Sesuaikan `DB_USERNAME` dan `DB_PASSWORD` di `.env.blackbox`. Jika `php` atau `mysql` belum ada di PATH, isi `PHP_BIN` dan `MYSQL_BIN` dengan path executable Laragon.
+Sesuaikan `DB_USERNAME` dan `DB_PASSWORD` di `.env.blackbox`. Jika `php` atau `mysql` belum ada di PATH, isi `PHP_BIN` dan `MYSQL_BIN` dengan path executable Laragon / XAMPP.
 
 Jalankan test:
 
