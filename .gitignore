@@ -1,5 +1,10 @@
 /.env
+/.env.blackbox
+/node_modules/
+/playwright-report/
+/test-results/
 /storage/logs/*.log
+/storage/sessions/*
 /storage/uploads/*
 !/storage/uploads/.gitkeep
 .lerd.yaml

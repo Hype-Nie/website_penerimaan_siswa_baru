@@ -135,16 +135,44 @@ $documents = $selectedApplicant ? documents_for_registration($selectedApplicant[
                     <h6 class="m-0 font-weight-bold text-primary">Form Verifikasi</h6>
                 </div>
                 <div class="card-body">
-                    <form action="<?= e(url_for('admin-verifikasi-berkas')) ?>" method="post">
+                    <form
+                        action="<?= e(url_for('admin-verifikasi-berkas')) ?>"
+                        method="post"
+                        data-loading
+                        data-confirm="Pastikan pilihan dokumen, status berkas, dan catatan sudah benar sebelum menyimpan verifikasi."
+                        data-loading-title="Mengirim Email"
+                        data-loading-message="Mohon tunggu, sistem sedang menyimpan verifikasi berkas dan mengirim email ke pendaftar. Jangan tutup halaman ini sampai proses selesai."
+                    >
                         <input type="hidden" name="registration_id" value="<?= e($selectedApplicant['id']) ?>">
+                        <input type="hidden" name="document_selection_mode" value="multi">
                         <div class="form-group">
-                            <label>Dokumen</label>
-                            <select class="form-control strong-input" name="document_id">
-                                <option value="">Semua dokumen</option>
+                            <label>Dokumen yang Diverifikasi</label>
+                            <div class="custom-control custom-checkbox mb-2">
+                                <input type="checkbox" class="custom-control-input" id="verify-all-documents" name="verify_all" value="1">
+                                <label class="custom-control-label" for="verify-all-documents">Semua dokumen yang sudah diupload</label>
+                            </div>
+                            <div class="border rounded p-2">
                                 <?php foreach ($documents as $document): ?>
-                                    <option value="<?= e($document['id']) ?>"><?= e($document['name']) ?></option>
+                                    <div class="custom-control custom-checkbox mb-1">
+                                        <input
+                                            type="checkbox"
+                                            class="custom-control-input"
+                                            id="document-<?= e($document['id']) ?>"
+                                            name="document_ids[]"
+                                            value="<?= e($document['id']) ?>"
+                                            <?= empty($document['file_path']) ? 'disabled' : '' ?>
+                                        >
+                                        <label class="custom-control-label" for="document-<?= e($document['id']) ?>">
+                                            <?= e($document['name']) ?>
+                                            <span class="badge badge-<?= e(status_class($document['status'])) ?> ml-1"><?= e($document['status']) ?></span>
+                                            <?php if (empty($document['file_path'])): ?>
+                                                <span class="text-muted small">(belum upload)</span>
+                                            <?php endif; ?>
+                                        </label>
+                                    </div>
                                 <?php endforeach; ?>
-                            </select>
+                            </div>
+                            <small class="form-text text-muted">Pilih beberapa dokumen sekaligus, atau centang semua dokumen yang sudah diupload.</small>
                         </div>
                         <div class="form-group">
                             <label>Status Berkas</label>
@@ -158,7 +186,7 @@ $documents = $selectedApplicant ? documents_for_registration($selectedApplicant[
                             <label>Catatan Perbaikan</label>
                             <textarea class="form-control strong-input" name="note" rows="3" placeholder="Contoh: Foto KK kurang jelas"></textarea>
                         </div>
-                        <button class="btn btn-success btn-block" type="submit">Simpan & Kirim Email</button>
+                        <button class="btn btn-success btn-block" type="submit" data-loading-button-text="Mengirim Email...">Simpan & Kirim</button>
                     </form>
                 </div>
             </div>

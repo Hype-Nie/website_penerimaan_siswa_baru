@@ -77,7 +77,7 @@ $schoolYear = $student['school_year'] ?? $data['school']['year'];
                     </div>
                 <?php endif; ?>
 
-                <form action="<?= e(url_for('siswa-formulir')) ?>" method="post" data-confirm="Apakah data formulir sudah benar? Klik OK untuk menyimpan formulir.">
+                <form action="<?= e(url_for('siswa-formulir')) ?>" method="post" data-confirm="Pastikan data formulir sudah benar sebelum disimpan. Lanjutkan simpan formulir?">
                     <h5 class="form-section-title">Identitas Calon Siswa</h5>
                     <div class="form-row">
                         <div class="form-group col-md-6">

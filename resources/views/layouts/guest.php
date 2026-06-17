@@ -12,6 +12,8 @@
 
     <?= $content ?>
 
+    <?php require base_path('resources/views/layouts/partials/loading.php'); ?>
+
     <?php require base_path('resources/views/layouts/partials/scripts.php'); ?>
 </body>
 </html>

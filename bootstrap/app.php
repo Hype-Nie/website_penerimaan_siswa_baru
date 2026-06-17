@@ -13,7 +13,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$envFile = BASE_PATH . '/.env';
+$envFileName = getenv('PSB_ENV_FILE') ?: '.env';
+$envFile = preg_match('/^(?:[A-Za-z]:[\/\\\\]|[\/\\\\])/', $envFileName)
+    ? $envFileName
+    : BASE_PATH . '/' . ltrim($envFileName, '/\\');
 
 if (file_exists($envFile)) {
     foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {

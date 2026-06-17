@@ -2,14 +2,14 @@
 
 <main class="auth-page">
     <section class="auth-card auth-card-login">
-        <img class="auth-logo" src="<?= asset('img/logo-sekolah.svg') ?>" alt="Logo sekolah">
+        <img class="auth-logo" src="<?= asset('img/logo_utama.png') ?>" alt="Logo sekolah">
         <h1>Aplikasi Pendaftaran Siswa</h1>
 
         <?php if (($_GET['status'] ?? '') === 'logout'): ?>
             <div class="alert alert-info py-2">Anda sudah logout.</div>
         <?php endif; ?>
 
-        <form action="<?= e(url_for('login')) ?>" method="post">
+        <form action="<?= e(url_for('login')) ?>" method="post" data-no-confirm>
             <div class="form-group">
                 <input type="email" class="form-control auth-input" name="email" placeholder="Masukkan Email..." required>
             </div>
