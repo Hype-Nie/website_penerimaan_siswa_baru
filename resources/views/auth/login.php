@@ -9,7 +9,7 @@
             <div class="alert alert-info py-2">Anda sudah logout.</div>
         <?php endif; ?>
 
-        <form action="<?= e(url_for('login')) ?>" method="post">
+        <form action="<?= e(url_for('login')) ?>" method="post" data-no-confirm>
             <div class="form-group">
                 <input type="email" class="form-control auth-input" name="email" placeholder="Masukkan Email..." required>
             </div>

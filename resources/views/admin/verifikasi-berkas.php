@@ -139,6 +139,7 @@ $documents = $selectedApplicant ? documents_for_registration($selectedApplicant[
                         action="<?= e(url_for('admin-verifikasi-berkas')) ?>"
                         method="post"
                         data-loading
+                        data-confirm="Pastikan pilihan dokumen, status berkas, dan catatan sudah benar sebelum menyimpan verifikasi."
                         data-loading-title="Mengirim Email"
                         data-loading-message="Mohon tunggu, sistem sedang menyimpan verifikasi berkas dan mengirim email ke pendaftar. Jangan tutup halaman ini sampai proses selesai."
                     >

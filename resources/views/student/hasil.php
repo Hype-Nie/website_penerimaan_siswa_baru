@@ -7,6 +7,7 @@ $reRegistrationDocuments = $data['re_registration_documents'] ?? [];
 $reRegistrationFee = format_rupiah(re_registration_fee_amount());
 $statementTemplateUrl = url_for('template-surat-pernyataan-daftar-ulang');
 $statementTemplateDownloadUrl = url_for('download-template-surat-pernyataan-daftar-ulang');
+$selectionStatusClass = status_class($selectionStatus);
 ?>
 
 <div class="container-fluid">
@@ -14,7 +15,9 @@ $statementTemplateDownloadUrl = url_for('download-template-surat-pernyataan-daft
         <div class="selection-icon">
             <i class="fas fa-bullhorn"></i>
         </div>
-        <h2><?= e($selectionStatus) ?></h2>
+        <div class="selection-status-highlight selection-status-<?= e($selectionStatusClass) ?>">
+            <span><?= e($selectionStatus) ?></span>
+        </div>
         <p>Hasil seleksi akan tampil setelah admin menyelesaikan proses seleksi dan kepala sekolah mempublikasikan hasil penerimaan siswa baru.</p>
         <div class="result-detail">
             <span>Nomor Pendaftaran</span>
@@ -72,7 +75,7 @@ $statementTemplateDownloadUrl = url_for('download-template-surat-pernyataan-daft
                     <div class="alert alert-warning mb-3">
                         <i class="fas fa-exclamation-triangle"></i> Anda wajib mengisi daftar ulang dan mengunggah berkas tambahan berikut.
                     </div>
-                    <form action="<?= e(url_for('siswa-hasil')) ?>" method="post" enctype="multipart/form-data" data-confirm="Apakah data daftar ulang sudah benar? Klik OK untuk mengirim ke admin.">
+                    <form action="<?= e(url_for('siswa-hasil')) ?>" method="post" enctype="multipart/form-data" data-confirm="Pastikan data daftar ulang dan berkas tambahan sudah benar sebelum dikirim ke admin. Lanjutkan kirim daftar ulang?">
                         <input type="hidden" name="action" value="re_register">
                         <?php foreach ($reRegistrationDocuments as $document): ?>
                             <div class="form-group text-left">

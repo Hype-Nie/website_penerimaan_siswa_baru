@@ -69,10 +69,10 @@ $reRegistrationDocuments = $selectedApplicant && $reRegistrationSchemaReady ? re
                 </div>
 
                 <?php if (($selectedApplicant['re_registration_status'] ?? '') === 'Dikirim'): ?>
-                    <form action="<?= e(url_for('admin-hasil-seleksi')) ?>" method="post" class="mt-3">
+                    <form action="<?= e(url_for('admin-hasil-seleksi')) ?>" method="post" class="mt-3" data-confirm="Pastikan berkas daftar ulang peserta sudah sesuai sebelum dikonfirmasi. Lanjutkan konfirmasi daftar ulang?">
                         <input type="hidden" name="action" value="confirm_re_registration">
                         <input type="hidden" name="registration_id" value="<?= e($selectedApplicant['id']) ?>">
-                        <button class="btn btn-success" type="submit" onclick="return confirm('Konfirmasi daftar ulang peserta ini?')">
+                        <button class="btn btn-success" type="submit">
                             <i class="fas fa-check"></i> Konfirmasi Daftar Ulang
                         </button>
                     </form>

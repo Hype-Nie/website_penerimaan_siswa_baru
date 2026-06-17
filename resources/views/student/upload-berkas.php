@@ -27,7 +27,7 @@ $isAccepted = registration_is_accepted($student);
     <?php endif; ?>
 
     <?php if ($canUploadDocuments): ?>
-        <form action="<?= e(url_for('siswa-upload-berkas')) ?>" method="post" enctype="multipart/form-data">
+        <form action="<?= e(url_for('siswa-upload-berkas')) ?>" method="post" enctype="multipart/form-data" data-confirm="Pastikan berkas yang dipilih sudah benar sebelum diupload.">
     <?php endif; ?>
         <div class="row">
             <?php foreach ($data['documents'] as $document): ?>

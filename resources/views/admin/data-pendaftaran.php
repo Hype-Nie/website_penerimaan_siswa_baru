@@ -45,10 +45,10 @@
                                 <td><span class="badge badge-<?= e(status_class($applicant['form_status'])) ?>"><?= e($applicant['form_status']) ?></span></td>
                                 <td class="table-actions">
                                     <a class="btn btn-info btn-sm" href="<?= e(url_for('admin-detail-pendaftaran', ['id' => $applicant['id'] ?? 0])) ?>">Detail</a>
-                                    <form action="<?= e(url_for('admin-data-pendaftaran')) ?>" method="post">
+                                    <form action="<?= e(url_for('admin-data-pendaftaran')) ?>" method="post" data-confirm="Data pendaftaran yang dihapus akan membuat pendaftar kembali ke status belum mengisi formulir. Apakah Anda yakin ingin menghapus data ini?">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="registration_id" value="<?= e($applicant['id'] ?? 0) ?>">
-                                        <button class="btn btn-danger btn-sm" type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus data pendaftaran siswa ini?')">Hapus</button>
+                                        <button class="btn btn-danger btn-sm" type="submit">Hapus</button>
                                     </form>
                                     <a class="btn btn-success btn-sm" href="<?= e(url_for('admin-verifikasi-berkas', ['id' => $applicant['id'] ?? 0])) ?>">Verifikasi</a>
                                 </td>

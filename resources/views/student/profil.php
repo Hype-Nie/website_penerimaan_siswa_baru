@@ -8,7 +8,7 @@
                     <h6 class="m-0 font-weight-bold text-primary">Edit Profil</h6>
                 </div>
                 <div class="card-body">
-                    <form action="<?= e(url_for('siswa-profil')) ?>" method="post">
+                    <form action="<?= e(url_for('siswa-profil')) ?>" method="post" data-confirm="Pastikan perubahan profil sudah benar sebelum disimpan.">
                         <div class="form-group">
                             <label>Nama</label>
                             <input type="text" class="form-control strong-input" name="name" value="<?= e($student['name']) ?>">

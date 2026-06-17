@@ -25,7 +25,7 @@
                                 <td><span class="badge badge-<?= e(status_class($applicant['selection_status'])) ?>"><?= e($applicant['selection_status']) ?></span></td>
                                 <td>
                                     <?php if ($readyForSelection): ?>
-                                        <form action="<?= e(url_for('admin-proses-seleksi')) ?>" method="post" class="form-inline">
+                                        <form action="<?= e(url_for('admin-proses-seleksi')) ?>" method="post" class="form-inline" data-confirm="Pastikan status seleksi peserta sudah benar sebelum disimpan.">
                                             <input type="hidden" name="registration_id" value="<?= e($applicant['id'] ?? 0) ?>">
                                             <select class="form-control form-control-sm mr-2" name="selection_status">
                                                 <?php foreach (['Belum Diproses', 'Diterima', 'Tidak Diterima', 'Cadangan'] as $status): ?>
