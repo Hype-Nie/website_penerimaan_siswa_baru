@@ -1437,7 +1437,7 @@ function delete_registration(array $input): bool
     $stmt = db()->prepare('UPDATE registrations SET deleted_at = NOW() WHERE id = ?');
     $stmt->execute([$registrationId]);
 
-    flash('success', 'Data pendaftaran berhasil dihapus.');
+    flash('success', 'Data pendaftaran berhasil dihapus. Akun pendaftar akan kembali ke status belum mengisi dan harus mengirim formulir baru.');
     return true;
 }
 

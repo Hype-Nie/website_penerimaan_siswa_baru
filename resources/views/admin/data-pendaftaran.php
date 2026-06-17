@@ -45,7 +45,6 @@
                                 <td><span class="badge badge-<?= e(status_class($applicant['form_status'])) ?>"><?= e($applicant['form_status']) ?></span></td>
                                 <td class="table-actions">
                                     <a class="btn btn-info btn-sm" href="<?= e(url_for('admin-detail-pendaftaran', ['id' => $applicant['id'] ?? 0])) ?>">Detail</a>
-                                    <a class="btn btn-primary btn-sm" href="<?= e(url_for('admin-detail-pendaftaran', ['id' => $applicant['id'] ?? 0])) ?>">Edit</a>
                                     <form action="<?= e(url_for('admin-data-pendaftaran')) ?>" method="post">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="registration_id" value="<?= e($applicant['id'] ?? 0) ?>">
